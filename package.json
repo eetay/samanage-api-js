@@ -1,12 +1,12 @@
 {
   "name": "samanage-api-js",
-  "version": "1.0.0",
-  "description": "Samanage API javascript",
-  "main": "index.js",
+  "version": "1.0.1",
+  "description": "Samanage API library for javascript",
+  "main": "samanage-api.js",
   "repository": "git@github.com:eetay/samanage-api-js.git",
   "author": "Eetay Natan <eetay.natan@samanage.com>",
   "license": "MIT",
   "dependencies": {
-    "request": "2.87.0"
+    "request": "2.87.0",
   }
 }
