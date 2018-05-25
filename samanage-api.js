@@ -29,34 +29,34 @@ var SamanageAPI = {
       if (!type.match(cond)) throw func + ': parameter ' + index + ' must match ' + cond
     })
   },
-  get: function(object_type) {
+  get: function(object_type, scope) {
     return function(filters) {
       SamanageAPI.validateParams('get(filters)', arguments, [/object/])
       return {
-        path: '/' + object_type + 's.json?' + filters.to_query(),
+        path: (scope ? '/' + scope : '') + '/' + object_type + 's.json?' + filters.to_query(),
         method: request.get
       }
     }
   },
-  create: function(object_type) {
+  create: function(object_type, scope) {
     return function(object) {
       SamanageAPI.validateParams('create(object)', arguments, [/object/])
       var wrapper = {}
       wrapper[object_type] = object
       return {
-        path: '/' + object_type +'s.json',
+        path: (scope ? '/' + scope : '') + '/' + object_type +'s.json',
         body: JSON.stringify(wrapper),
         method: request.post
       }
     }
   },
-  update: function(object_type) {
+  update: function(object_type, scope) {
     return function(object_id, object) {
       SamanageAPI.validateParams('update(object_id, object)', arguments, [/string|number/, /object/])
       var wrapper = {}
       wrapper[object_type] = object
       return {
-        path: '/' + object_type + 's/' + object_id + '.json',
+        path: (scope ? '/' + scope : '') + '/' + object_type + 's/' + object_id + '.json',
         body: JSON.stringify(wrapper),
         method: request.put
       }
