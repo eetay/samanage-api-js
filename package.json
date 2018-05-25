@@ -6,7 +6,7 @@
   "repository": "git@github.com:eetay/samanage-api-js.git",
   "author": "Eetay Natan <eetay.natan@samanage.com>",
   "license": "MIT",
-  "keywords": ["Samanage"]
+  "keywords": ["Samanage", "api", "samanage"]
   "dependencies": {
     "request": "2.87.0",
   }
