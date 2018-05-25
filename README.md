@@ -33,15 +33,26 @@ SamanageAPI.callSamanageAPI(...)
 
 ### Building filters
 ```javascript
+var get_incidents = SamanageAPI.get('incident')
 var filters = new SamanageAPI.Filters().
   sort_by('name').
-  sort_order(false).
-  between_dates('created','2018-01-01','2018-01-02')
+  sort_order(SamanageAPI.Filter.DESC).
+  between_dates('created','2018-01-01','2018-01-02').
+  per_page(100).
+  page(3)
 var request = get_incidents(filters)
 ```
+
 ## Update
 ```javascript
-  request = SamanageAPI.update('incident')(3, {
-    name:'opened with samanage-api-js library'
-  })
+var request = SamanageAPI.update('incident')(3, {
+  name:'opened with samanage-api-js library'
+})
+```
+
+## Create
+```javascript
+var request = SamanageAPI.create('incident')({
+  name:'opened with samanage-api-js library'
+})
 ```

@@ -1,19 +1,37 @@
 var request = require('request');
 
+var isFunction = (obj) => (!!(obj && obj.constructor && obj.call && obj.apply))
+var functionProto = (name, func) => (name + func.toString().match(/\(.*\)/)[0])
+
+function describeObject(obj) {
+  var ret = []
+  var consts = []
+  Object.keys(obj).forEach(function(attr) {
+    if (obj.hasOwnProperty(attr)) {
+      if (isFunction(obj[attr])) {
+        ret.push(functionProto(attr, obj[attr]))
+      } else {
+        consts.push(attr)
+      }
+    }
+  })
+  ret.push({constants: consts})
+  return ret
+}
+
 var SamanageAPI = {
   Filters: function() {},
-  validate_params: function(func, all, conds) {
+  validateParams: function(func, all, conds) {
     if (!SamanageAPI.debug) return
     conds.forEach(function(cond, index) {
       var type = typeof all[index]
-      console.log(type, conds, all)
       if (!type) throw func + ': parameter ' + index + ' is missing'
       if (!type.match(cond)) throw func + ': parameter ' + index + ' must match ' + cond
     })
   },
   get: function(object_type) {
     return function(filters) {
-      SamanageAPI.validate_params('get(filters)', arguments, [/object/])
+      SamanageAPI.validateParams('get(filters)', arguments, [/object/])
       return {
         path: '/' + object_type + 's.json?' + filters.to_query(),
         method: request.get
@@ -22,7 +40,7 @@ var SamanageAPI = {
   },
   create: function(object_type) {
     return function(object) {
-      SamanageAPI.validate_params('create(object)', arguments, [/object/])
+      SamanageAPI.validateParams('create(object)', arguments, [/object/])
       var wrapper = {}
       wrapper[object_type] = object
       return {
@@ -34,7 +52,7 @@ var SamanageAPI = {
   },
   update: function(object_type) {
     return function(object_id, object) {
-      SamanageAPI.validate_params('update(object_id, object)', arguments, [/string|integer/, /object/])
+      SamanageAPI.validateParams('update(object_id, object)', arguments, [/string|number/, /object/])
       var wrapper = {}
       wrapper[object_type] = object
       return {
@@ -74,13 +92,16 @@ var SamanageAPI = {
       }
     })
   },
-  debug: true,
+  debug: false,
   log: function() {
     if (SamanageAPI.debug) console.log('DEBUG', arguments)
   }
 }
+SamanageAPI.help = describeObject(SamanageAPI)
 
 SamanageAPI.Filters.prototype = {
+  DESC: false,
+  ASC: true,
   add: function(filters_hash) {
     var obj = this
     Object.keys(filters_hash).forEach(function(key) {
@@ -122,6 +143,7 @@ SamanageAPI.Filters.prototype = {
     }).join('&')
   }
 }
+SamanageAPI.Filters.help = describeObject(SamanageAPI.Filters.prototype)
 
 module.exports = SamanageAPI
 
