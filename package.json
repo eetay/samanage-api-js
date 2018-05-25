@@ -1,13 +1,18 @@
 {
-  "name": "samanage-api-js",
-  "version": "1.0.1",
-  "description": "This is my personal library for performing API calls from javascript to Samanage Helpdesk service. It is by no means complete and is not official",
+  "name": "samanage-api",
+  "version": "1.0.2",
+  "description": "Library for performing API calls to Samanage Helpdesk Service",
   "main": "samanage-api.js",
   "repository": "git@github.com:eetay/samanage-api-js.git",
   "author": "Eetay Natan <eetay.natan@samanage.com>",
-  "license": "MIT",
-  "keywords": ["Samanage", "api", "samanage"],
+  "license": "",
+  "keywords": [
+    "Samanage",
+    "samanage",
+    "api"
+  ],
   "dependencies": {
-    "request": "2.87.0",
-  }
+    "request": "2.87.0"
+  },
+  "homepage": "https://github.com/eetay/samanage-api-js/blob/master/README.md"
 }
