@@ -12,7 +12,12 @@
     "api"
   ],
   "dependencies": {
+    "expect": "23.0.0",
     "request": "2.87.0"
   },
-  "homepage": "https://github.com/eetay/samanage-api-js/blob/master/README.md"
+  "homepage": "https://github.com/eetay/samanage-api-js/blob/master/README.md",
+  "devDependencies": {},
+  "scripts": {
+    "test": "jasmine"
+  }
 }
