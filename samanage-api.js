@@ -128,7 +128,7 @@ SamanageAPI.Connection.prototype = {
         } else try {
           resolve({data: JSON.parse(body), ref: ref})
         } catch(e) {
-          reject({error: 'Invalid JSON response data', info: body, ref: ref, e: ex})
+          reject({error: 'Invalid JSON response data', info: body, ref: ref, exception: e})
         }
       })
     })

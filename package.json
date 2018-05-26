@@ -18,6 +18,6 @@
   "homepage": "https://github.com/eetay/samanage-api-js/blob/master/README.md",
   "devDependencies": {},
   "scripts": {
-    "test": "jasmine"
+    "test": "node spec/samanage-api-spec.js"
   }
 }
