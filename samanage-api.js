@@ -1,4 +1,5 @@
 var request = require('request');
+var url = require('url');
 
 var isFunction = (obj) => (!!(obj && obj.constructor && obj.call && obj.apply))
 var functionProto = (name, func) => (name + func.toString().match(/\(.*\)/)[0])
@@ -33,7 +34,7 @@ var SamanageAPI = {
     return function(filters) {
       SamanageAPI.validateParams('get(filters)', arguments, [/object/])
       return {
-        path: (scope ? '/' + scope : '') + '/' + object_type + 's.json?' + filters.to_query(),
+        path: url.resolve(scope || '', object_type + 's.json?', filters.to_query()),
         method: request.get
       }
     }
@@ -44,7 +45,7 @@ var SamanageAPI = {
       var wrapper = {}
       wrapper[object_type] = object
       return {
-        path: (scope ? '/' + scope : '') + '/' + object_type +'s.json',
+        path: url.resolve(scope || '', object_type +'s.json'),
         body: JSON.stringify(wrapper),
         method: request.post
       }
@@ -56,48 +57,85 @@ var SamanageAPI = {
       var wrapper = {}
       wrapper[object_type] = object
       return {
-        path: (scope ? '/' + scope : '') + '/' + object_type + 's/' + object_id + '.json',
+        path: url.resolve(scope || '', object_type + 's/' + object_id + '.json'),
         body: JSON.stringify(wrapper),
         method: request.put
       }
     }
   },
-  connection: function(token, origin = 'https://api.samanage.com') {
-    return {
-      origin: origin,
-      headers: {
-        'X-Samanage-Authorization': 'Bearer ' + token,
-        'Content-Type': 'application/json',
-        'Accept': 'application/vnd.samanage.v2.1+json'
-      }
+  Connection: function(token, origin = 'https://api.samanage.com') {
+    this.connection = this
+    this.origin = origin
+    this.headers = {
+      'X-Samanage-Authorization': 'Bearer ' + token,
+      'Content-Type': 'application/json',
+      'Accept': 'application/vnd.samanage.v2.1+json'
     }
-  },
-  callSamanageAPI: function(connection, action, onSuccess, onFailure) {
-    var options = {
-      url: connection.origin + '/' + action.path,
-      headers: connection.headers
-    }
-    if (action.body) options['body'] = action.body
-    SamanageAPI.log('callSamanageAPI:', options)
-    action.method(options, function(error, response, body) {
-      if (!error && response.statusCode == 200) {
-        try {
-          onSuccess(JSON.parse(body))
-        } catch(e) {
-          onFailure({error: 'Invalid response data', info: body})
-        }
-      }
-      else {
-        onFailure({error: error, httpStatus: (response && response.statusCode), info: error || body})
-      }
-    })
+    this.addMetadata('ItsmStates','itsm_state')
   },
   debug: false,
   log: function() {
-    if (SamanageAPI.debug) console.log('DEBUG', arguments)
+    if (SamanageAPI.debug) console.log('DEBUG', ...arguments)
   }
 }
-SamanageAPI.help = describeObject(SamanageAPI)
+
+SamanageAPI.Connection.prototype = {
+  addMetadata: function(object_name, rest_name) {
+    this[object_name] = {
+      filters: null,
+      init: (filters = null) => {
+        this.filters = filters
+      },
+      then: (after_resolve) => {
+        var connection = this
+        var object_name = object_name
+        var filters = this.filters || new SamanageAPI.Filters()
+        connection[object_name] = new Promise(function(resolve, reject) {
+          connection.callSamanageAPI(
+            SamanageAPI.get(rest_name)( filters )
+          ).then(function({data}) {
+            SamanageAPI.log('metadata result:', data)
+            var obj = {}
+            data.forEach(function(item) {
+              obj[item.id] = item
+            })
+            resolve(obj)
+          }).catch(
+            reject
+          )
+        })
+        this.connection[object_name].then(after_resolve)
+        return this.connection[object_name]
+      }
+    }
+  },
+  callSamanageAPI: function(action, ref) {
+    var connection = this
+    return new Promise(function(resolve, reject) {
+      var options = {
+        url: url.resolve(connection.origin, action.path),
+        headers: connection.headers
+      }
+      ref = ref || options.url
+      if (action.body) options['body'] = action.body
+      SamanageAPI.log('callSamanageAPI:', ref, options, action)
+      action.method(options, function(error, response, body) {
+        SamanageAPI.log('callSamanageAPI result:', ref, error)
+        if (response && response.statusCode != 200) {
+          reject({error: 'HTTP Error', httpStatus: (response && response.statusCode), info: body, ref: ref})
+        } else if (error) {
+          reject({error: error, ref: ref})
+        } else try {
+          resolve({data: JSON.parse(body), ref: ref})
+        } catch(e) {
+          reject({error: 'Invalid JSON response data', info: body, ref: ref, exception: e})
+        }
+      })
+    })
+  }
+}
+
+
 
 SamanageAPI.Filters.prototype = {
   DESC: false,
@@ -143,6 +181,9 @@ SamanageAPI.Filters.prototype = {
     }).join('&')
   }
 }
+
+SamanageAPI.help = describeObject(SamanageAPI)
+SamanageAPI.Connection.help = describeObject(SamanageAPI.Connection.prototype)
 SamanageAPI.Filters.help = describeObject(SamanageAPI.Filters.prototype)
 
 module.exports = SamanageAPI
