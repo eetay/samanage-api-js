@@ -5,10 +5,17 @@ var connection = new SamanageAPI.Connection(process.env.TOKEN, 'http://localhost
 
 //SamanageAPI.debug = true
 var get_incidents = SamanageAPI.get('incident')
+connection.addMetadata('Users','user')
 
+connection.Users.init()
 connection.ItsmStates.init()
-connection.ItsmStates.then(function(values) {console.log('values')})
-//Promise.all([connection.ItsmStates]).then(function([states]) {console.log(states)})
+connection.Users.then(function(users) {
+  expect(users['606133']).toHaveProperty('email')
+})
+Promise.all([connection.ItsmStates, connection.Users]).then(function([states, users]) {
+  expect(states['25157']).toHaveProperty('itsm_type')
+  expect(users['606133']).toHaveProperty('email')
+})
 
 /*
 describe('help', function() {
@@ -18,6 +25,7 @@ describe('help', function() {
 })
 */
 
+/*
 function testAction(action, expectedOnSuccess, expectedOnFailure) {
   var unexpectedSuccess = function(obj) {
     expect('unexpectedSuccess called').toBe('not to have been called')
@@ -80,3 +88,4 @@ testAction(
   },
   null
 )
+*/

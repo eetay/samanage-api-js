@@ -64,38 +64,14 @@ var SamanageAPI = {
     }
   },
   Connection: function(token, origin = 'https://api.samanage.com') {
-    var connection = this
-    this.ItsmStates = {
-      filters: null,
-      init: (filters = null) => {
-        this.filters = filters
-      },
-      then: (after_resolve) => {
-        console.log('CONN:',connection)
-        var filters = this.filters || new SamanageAPI.Filters()
-        connection.ItsmStates = new Promise(function(resolve, reject) {
-          connection.callSamanageAPI(
-            SamanageAPI.get('itsm_state')( filters ),
-            function(data) {
-              var obj = {}
-              data.forEach(function(item) {
-                obj[item.id] = item
-              })
-              resolve(obj)
-            },
-            reject
-          )
-        })
-        connection.ItsmStates.then(after_resolve)
-        return connection.ItsmStates
-      }
-    },
+    this.connection = this
     this.origin = origin
     this.headers = {
       'X-Samanage-Authorization': 'Bearer ' + token,
       'Content-Type': 'application/json',
       'Accept': 'application/vnd.samanage.v2.1+json'
     }
+    this.addMetadata('ItsmStates','itsm_state')
   },
   debug: false,
   log: function() {
@@ -104,6 +80,35 @@ var SamanageAPI = {
 }
 
 SamanageAPI.Connection.prototype = {
+  addMetadata: function(object_name, rest_name) {
+    this[object_name] = {
+      filters: null,
+      init: (filters = null) => {
+        this.filters = filters
+      },
+      then: (after_resolve) => {
+        var connection = this
+        var object_name = object_name
+        var filters = this.filters || new SamanageAPI.Filters()
+        connection[object_name] = new Promise(function(resolve, reject) {
+          connection.callSamanageAPI(
+            SamanageAPI.get(rest_name)( filters )
+          ).then(function({data}) {
+            SamanageAPI.log('metadata result:', data)
+            var obj = {}
+            data.forEach(function(item) {
+              obj[item.id] = item
+            })
+            resolve(obj)
+          }).catch(
+            reject
+          )
+        })
+        this.connection[object_name].then(after_resolve)
+        return this.connection[object_name]
+      }
+    }
+  },
   callSamanageAPI: function(action, ref) {
     var connection = this
     return new Promise(function(resolve, reject) {
@@ -115,7 +120,7 @@ SamanageAPI.Connection.prototype = {
       if (action.body) options['body'] = action.body
       SamanageAPI.log('callSamanageAPI:', ref, options, action)
       action.method(options, function(error, response, body) {
-        SamanageAPI.log('callSamanageAPI result:', ref, error, response, body)
+        SamanageAPI.log('callSamanageAPI result:', ref, error)
         if (response && response.statusCode != 200) {
           reject({error: 'HTTP Error', httpStatus: (response && response.statusCode), info: body, ref: ref})
         } else if (error) {
@@ -129,7 +134,6 @@ SamanageAPI.Connection.prototype = {
     })
   }
 }
-
 
 
 
