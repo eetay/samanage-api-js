@@ -21,10 +21,6 @@ var failure = function(error) {...}
 connection.callSamanageAPI(request).then(success).catch(failure)
 ```
 
-## Itsm states
-connection.ItsmStates.init()
-connection.ItsmStates.then(function(all_states) {...})
-
 ## Retrieval with filters
 ```javascript
 var get_incidents = SamanageAPI.get('incident')
@@ -72,6 +68,21 @@ console.log(SamanageAPI.Filters.help)
 console.log(SamanageAPI.ItsmStates.help)
 console.log(SamanageAPI.Connection.help)
 ```
+
+## ItsmStates and additional Metadata objects
+connection.ItsmStates.init()
+connection.ItsmStates.then(function(states) {...})
+
+### define additional metadata objects
+connection.addMetadata('Users','user')
+connection.Users.init()
+
+### do something when Users and States are both available
+Promise.all([connection.ItsmStates, connection.Users]).then(
+  function([states, users]) {...}
+)
+
+
 
 ## Migrating from 1.x to 2.x
 Changes in version 2.0
