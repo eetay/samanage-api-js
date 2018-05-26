@@ -11,13 +11,19 @@ npm install samanage-api
 
 ## Making a call
 ```javascrip
+var success = function({data}) {...}
+var failure = function({error}) {...}
 var SamanageAPI = require('samanage-api')
-var connection = SamanageAPI.connection(process.env.TOKEN)
+var connection = new SamanageAPI.Connection(process.env.TOKEN)
 var request = ...
 var success = function(data) {...}
 var failure = function(error) {...}
-SamanageAPI.callSamanageAPI(connection, request, success, failure)
+connection.callSamanageAPI(request).then(success).catch(failure)
 ```
+
+## Itsm states
+connection.ItsmStates.init()
+connection.ItsmStates.then(function(all_states) {...})
 
 ## Retrieval with filters
 ```javascript
@@ -56,4 +62,29 @@ var request = SamanageAPI.update('incident')(3, {
 var request = SamanageAPI.create('incident')({
   name:'opened with samanage-api-js library'
 })
+```
+
+## help
+
+```javascript
+console.log(SamanageAPI.help)
+console.log(SamanageAPI.Filters.help)
+console.log(SamanageAPI.ItsmStates.help)
+console.log(SamanageAPI.Connection.help)
+```
+
+## Migrating from 1.x to 2.x
+Changes in version 2.0
+- works with promises
+- conenction is now instantiated (you can open connections to multiple accounts or mulitple users in same account)
+- support for ItsmStates
+
+```javascript
+var connection = new SamanageAPI.connection(process.env.TOKEN)
+SamanageAPI.callSamanageAPI(connection, request, success, failure)
+```
+=>
+```javascript
+var connection = new SamanageAPI.Connection(process.env.TOKEN)
+connection.callSamanageAPI(request).then(success).catch(failure)
 ```
