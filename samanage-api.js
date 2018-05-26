@@ -1,5 +1,6 @@
 var request = require('request');
 var url = require('url');
+var path = require('path');
 
 var isFunction = (obj) => (!!(obj && obj.constructor && obj.call && obj.apply))
 var functionProto = (name, func) => (name + func.toString().match(/\(.*\)/)[0])
@@ -34,7 +35,7 @@ var SamanageAPI = {
     return function(filters) {
       SamanageAPI.validateParams('get(filters)', arguments, [/object/])
       return {
-        path: url.resolve(scope || '', object_type + 's.json?', filters.to_query()),
+        path: path.join(scope || '', object_type + 's.json?') + filters.to_query(),
         method: request.get
       }
     }
@@ -45,7 +46,7 @@ var SamanageAPI = {
       var wrapper = {}
       wrapper[object_type] = object
       return {
-        path: url.resolve(scope || '', object_type +'s.json'),
+        path: path.join(scope || '', object_type +'s.json'),
         body: JSON.stringify(wrapper),
         method: request.post
       }
@@ -57,7 +58,7 @@ var SamanageAPI = {
       var wrapper = {}
       wrapper[object_type] = object
       return {
-        path: url.resolve(scope || '', object_type + 's/' + object_id + '.json'),
+        path: path.join(scope || '', object_type + 's/' + object_id + '.json'),
         body: JSON.stringify(wrapper),
         method: request.put
       }
