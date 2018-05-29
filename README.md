@@ -9,15 +9,17 @@ Feel free to contact me with requests, issues or questions.
 npm install samanage-api
 ```
 
-## Making a call
+## Initialize
 ```javascrip
-var success = function({data}) {...}
-var failure = function({error}) {...}
 var SamanageAPI = require('samanage-api')
 var connection = new SamanageAPI.Connection(process.env.TOKEN)
-var request = ...
+```
+
+## Making a call
+```javascrip
 var success = function(data) {...}
 var failure = function(error) {...}
+var request = ...  
 connection.callSamanageAPI(request).then(success).catch(failure)
 ```
 
@@ -70,17 +72,23 @@ console.log(SamanageAPI.Connection.help)
 ```
 
 ## ItsmStates and additional Metadata objects
+```javascript
 connection.ItsmStates.init()
 connection.ItsmStates.then(function(states) {...})
+```
 
 ### define additional metadata objects
+```javascript
 connection.addMetadata('Users','user')
 connection.Users.init()
+```
 
 ### do something when Users and States are both available
+```javascript
 Promise.all([connection.ItsmStates, connection.Users]).then(
   function([states, users]) {...}
 )
+```
 
 
 

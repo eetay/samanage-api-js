@@ -1,6 +1,6 @@
-var request = require('request');
-var url = require('url');
-var path = require('path');
+var request = require('request')
+var url = require('url')
+var path = require('path')
 
 var isFunction = (obj) => (!!(obj && obj.constructor && obj.call && obj.apply))
 var functionProto = (name, func) => (name + func.toString().match(/\(.*\)/)[0])
@@ -114,6 +114,7 @@ SamanageAPI.Connection.prototype = {
     var connection = this
     return new Promise(function(resolve, reject) {
       var options = {
+        followAllRedirects: true,
         url: url.resolve(connection.origin, action.path),
         headers: connection.headers
       }
