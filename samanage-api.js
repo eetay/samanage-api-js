@@ -65,6 +65,8 @@ var SamanageAPI = {
     }
   },
   Connection: function(token, origin = 'https://api.samanage.com') {
+    if (!(origin && origin.match(/^https|localhost/))) throw "origin must start with 'https://'"
+    this.debug = false
     this.connection = this
     this.origin = origin
     this.headers = {
@@ -122,14 +124,17 @@ SamanageAPI.Connection.prototype = {
       if (action.body) options['body'] = action.body
       SamanageAPI.log('callSamanageAPI:', ref, options, action)
       action.method(options, function(error, response, body) {
-        SamanageAPI.log('callSamanageAPI result:', ref, error)
         if (response && response.statusCode != 200) {
+          SamanageAPI.log('callSamanageAPI HTTP error:', ref, response.statusCode)
           reject({error: 'HTTP Error', httpStatus: (response && response.statusCode), info: body, ref: ref})
         } else if (error) {
+          SamanageAPI.log('callSamanageAPI error:', ref, error)
           reject({error: error, ref: ref})
         } else try {
+          SamanageAPI.log('callSamanageAPI ok:', JSON.parse(body))
           resolve({data: JSON.parse(body), ref: ref})
         } catch(e) {
+          SamanageAPI.log('callSamanageAPI exception:', ref, e)
           reject({error: 'Invalid JSON response data', info: body, ref: ref, exception: e})
         }
       })

@@ -16,8 +16,10 @@
     "request": "2.87.0"
   },
   "homepage": "https://github.com/eetay/samanage-api-js/blob/master/README.md",
-  "devDependencies": {},
+  "devDependencies": {
+    "jest": "23.1.0"
+  },
   "scripts": {
-    "test": "node spec/samanage-api-spec.js"
+    "jest": "jest --detectOpenHandles"
   }
 }
