@@ -19,6 +19,7 @@ test('Users & States', () => {
   })
 })
 
+
 test('create Incident', ()=>{
   const name = 'opened with samanage-api-js library promises ' + Date.now()
   return expect(connection.callSamanageAPI(
@@ -33,6 +34,7 @@ test('Incident which does not exist return 404', ()=>{
     })
   )).rejects.toHaveProperty('httpStatus', 404)
 })
+
 
 var get_incidents = SamanageAPI.get('incident')
 
@@ -57,15 +59,24 @@ test('Get incidents created between dates with pagination', ()=>{
         between_dates('created','2018-01-01','2018-01-02').
         per_page(25).
         page(1)
-    )
+    ),
+    'REF'
   ).then(function(data) {
     //console.log(data)
-    expect(data).toHaveProperty('data')
+    expect(data).toEqual(
+      expect.objectContaining({
+        'ref': expect.stringContaining('REF'),
+        'data': expect.arrayContaining([
+          expect.objectContaining({'id':expect.anything()})
+         ])
+      })
+    )
   })
 })
 
+
 test('Users', () => {
-  return connection.Users.then(function(users) {
+  connection.Users.then(function(users) {
     //console.log(Object.keys(users).map(x=>(users[x].email)))
     expect(users['81']).toHaveProperty('email', 'michael@samanage.com')
   })
