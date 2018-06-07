@@ -71,21 +71,21 @@ console.log(SamanageAPI.ItsmStates.help)
 console.log(SamanageAPI.Connection.help)
 ```
 
-## ItsmStates and additional Metadata objects
+### define getter objects
+getter objects are promises to get all items of certain type
+be careful not to try retrieving too many items; currently there's no check on
+number of items which will cause long retrieval process
+
 ```javascript
-connection.ItsmStates.init()
-connection.ItsmStates.then(function(states) {...})
+var users_filter = new SamanageAPI.Filter()
+var users = connection.getter('user', users_filter)
+
+var itsm_states = connection.getter('itsm_state')
 ```
 
-### define additional metadata objects
+### do something when users and itsm states are both available
 ```javascript
-connection.addMetadata('Users','user')
-connection.Users.init()
-```
-
-### do something when Users and States are both available
-```javascript
-Promise.all([connection.ItsmStates, connection.Users]).then(
+Promise.all([itsm_states, users]).then(
   function([states, users]) {...}
 )
 ```

@@ -1,5 +1,5 @@
 var request = require('request')
-var url = require('url')
+var urlx = require('url')
 var path = require('path')
 
 var isFunction = (obj) => (!!(obj && obj.constructor && obj.call && obj.apply))
@@ -22,7 +22,15 @@ function describeObject(obj) {
 }
 
 var SamanageAPI = {
-  Filters: function() {},
+  getPaginationInfo: function (response_headers) {
+    return {
+      per_page: response_headers['x-per-page'],
+      current_page: response_headers['x-current-page'],
+      total_count: response_headers['x-total-count'],
+      total_pages: response_headers['x-total-pages']
+    }
+  },
+  Filters: function() { this.attrs={} },
   validateParams: function(func, all, conds) {
     if (!SamanageAPI.debug) return
     conds.forEach(function(cond, index) {
@@ -32,37 +40,52 @@ var SamanageAPI = {
     })
   },
   get: function(object_type, scope) {
-    return function(filters) {
+    action = function(filters) {
       SamanageAPI.validateParams('get(filters)', arguments, [/object/])
       return {
+        object_type: object_type,
+        scope: scope,
         path: path.join(scope || '', object_type + 's.json?') + filters.to_query(),
         method: request.get
       }
     }
+    action.object_type = object_type
+    action.scope = scope
+    return action
   },
   create: function(object_type, scope) {
-    return function(object) {
+    action = function(object) {
       SamanageAPI.validateParams('create(object)', arguments, [/object/])
       var wrapper = {}
       wrapper[object_type] = object
       return {
+        object_type: object_type,
+        scope: scope,
         path: path.join(scope || '', object_type +'s.json'),
         body: JSON.stringify(wrapper),
         method: request.post
       }
     }
+    action.object_type = object_type
+    action.scope = scope
+    return action
   },
   update: function(object_type, scope) {
-    return function(object_id, object) {
+    action = function(object_id, object) {
       SamanageAPI.validateParams('update(object_id, object)', arguments, [/string|number/, /object/])
       var wrapper = {}
       wrapper[object_type] = object
       return {
+        object_type: object_type,
+        scope: scope,
         path: path.join(scope || '', object_type + 's/' + object_id + '.json'),
         body: JSON.stringify(wrapper),
         method: request.put
       }
     }
+    action.object_type = object_type
+    action.scope = scope
+    return action
   },
   Connection: function(token, origin = 'https://api.samanage.com') {
     if (!(origin && origin.match(/^https|localhost/))) throw "origin must start with 'https://'"
@@ -74,7 +97,6 @@ var SamanageAPI = {
       'Content-Type': 'application/json',
       'Accept': 'application/vnd.samanage.v2.1+json'
     }
-    this.addMetadata('ItsmStates','itsm_state')
   },
   debug: false,
   log: function() {
@@ -82,42 +104,51 @@ var SamanageAPI = {
   }
 }
 
-SamanageAPI.Connection.prototype = {
-  addMetadata: function(object_name, rest_name) {
-    this[object_name] = {
-      filters: null,
-      init: (filters = null) => {
-        this.filters = filters
-      },
-      then: (after_resolve) => {
-        var connection = this
-        var object_name = object_name
-        var filters = this.filters || new SamanageAPI.Filters()
-        connection[object_name] = new Promise(function(resolve, reject) {
-          connection.callSamanageAPI(
-            SamanageAPI.get(rest_name)( filters )
-          ).then(function({data}) {
-            SamanageAPI.log('metadata result:', data)
-            var obj = {}
-            data.forEach(function(item) {
-              obj[item.id] = item
-            })
-            resolve(obj)
-          }).catch(
-            reject
-          )
+function promiseToGetNextPage(result, connection, action, filters) {
+  var current_filters = filters ? filters.clone() : new SamanageAPI.Filters()
+  var promise = new Promise(function(resolve, reject) {
+    var add_data = function({data, ref, pagination_info}) {
+      var rej = reject
+      var path = ref
+      if (data.length > 0) {
+        SamanageAPI.log(ref + ': recieved ' + data.length + 'new items on ' + path)
+        data.forEach(function(item) { 
+          result[item.id] = item 
         })
-        this.connection[object_name].then(after_resolve)
-        return this.connection[object_name]
+        next_page_filters = current_filters.clone().next_page()
+        if (pagination_info.total_pages >= next_page_filters.attrs.page) {
+          promiseToGetNextPage(result, connection, action, next_page_filters).then(function(x) {
+            SamanageAPI.log(ref + 'PROMISE RESOLVED')
+            resolve(result)
+          }).catch(rej)
+        }
+        else {
+          SamanageAPI.log(ref + ': RESOLVED NO PAGINATION')
+          resolve(result)
+        }
+      }
+      else {
+        SamanageAPI.log(ref + ': RESOLVED WITH PAGINATION')
+        resolve(result)
       }
     }
+    var path = action(current_filters).path
+    SamanageAPI.log('promiseToGetNextPage page#' + current_filters.attrs.page, connection.origin + '/' + path)
+    connection.callSamanageAPI(action(current_filters), path).then(add_data).catch(reject)
+  })
+  return promise
+}
+
+SamanageAPI.Connection.prototype = {
+  getter: function(object_type, filters) {
+    return promiseToGetNextPage({}, this, SamanageAPI.get(object_type), filters)
   },
   callSamanageAPI: function(action, ref) {
     var connection = this
     return new Promise(function(resolve, reject) {
       var options = {
         followAllRedirects: true,
-        url: url.resolve(connection.origin, action.path),
+        url: urlx.resolve(connection.origin, action.path),
         headers: connection.headers
       }
       ref = ref || options.url
@@ -131,8 +162,9 @@ SamanageAPI.Connection.prototype = {
           SamanageAPI.log('callSamanageAPI error:', ref, error)
           reject({error: error, ref: ref})
         } else try {
-          SamanageAPI.log('callSamanageAPI ok:', JSON.parse(body))
-          resolve({data: JSON.parse(body), ref: ref})
+          SamanageAPI.log('callSamanageAPI ok:', body.substring(0,100), response.headers)
+          pagination_info = SamanageAPI.getPaginationInfo(response.headers)
+          resolve({data: JSON.parse(body), ref: ref, pagination_info: pagination_info})
         } catch(e) {
           SamanageAPI.log('callSamanageAPI exception:', ref, e)
           reject({error: 'Invalid JSON response data', info: body, ref: ref, exception: e})
@@ -148,7 +180,7 @@ SamanageAPI.Filters.prototype = {
   DESC: false,
   ASC: true,
   add: function(filters_hash) {
-    var obj = this
+    var obj = this.attrs
     Object.keys(filters_hash).forEach(function(key) {
       var value = filters_hash[key]
       if ((typeof value == 'object') && key.match(/created|updated/)){ // Date Range
@@ -161,31 +193,40 @@ SamanageAPI.Filters.prototype = {
     return this
   },
   between_dates: function(column, date1, date2) {
-    this[column + '_custom_gte[]'] = date1
-    this[column + '_custom_lte[]'] = date2
+    this.attrs[column + '_custom_gte[]'] = date1
+    this.attrs[column + '_custom_lte[]'] = date2
     return this
   },
   sort_by: function(column) {
-    this['sort_by'] = column
+    this.attrs['sort_by'] = column
     return this
   },
   sort_order: function(order) {
-    this['sort_order'] = (order?'ASC':'DESC')
+    this.attrs['sort_order'] = (order?'ASC':'DESC')
     return this
   },
   page: function(page) {
-    this['page'] = page
+    this.attrs['page'] = page
+    return this
+  },
+  next_page: function() {
+    this.attrs['page'] = (this.attrs['page'] || 1) + 1
     return this
   },
   per_page: function(per_page) {
-    this['per_page'] = per_page
+    this.attrs['per_page'] = per_page
     return this
   },
   to_query: function() {
-    var obj = this
+    var obj = this.attrs
     return Object.keys(obj).map(function(key) {
       return encodeURIComponent(key) + '=' + encodeURIComponent(obj[key])
     }).join('&')
+  },
+  clone: function() {
+    var obj = new SamanageAPI.Filters()
+    Object.assign(obj.attrs, this.attrs)
+    return obj
   }
 }
 

@@ -1,4 +1,7 @@
 jest.setTimeout(120000)
+process.on('unhandledRejection', function(error, promise) {
+    console.error('UNHANDLED REJECTION - Promise: ', promise, ', Error: ', error, ').');
+});
 SamanageAPI = require('../samanage-api.js')
 if (typeof process.env.TOKEN == 'undefined') throw 'Error: for tests api token must be set using "export TOKEN=" shell command to account #5 in production'
 
@@ -6,20 +9,23 @@ var connection = new SamanageAPI.Connection(process.env.TOKEN, 'https://api.sama
 
 //SamanageAPI.debug = true
 var get_incidents = SamanageAPI.get('incident')
-connection.addMetadata('Users','user')
-
-connection.Users.init()
-connection.ItsmStates.init()
+var Users = connection.addMetadata('user')
+var ItsmStates = connection.addMetadata('itsm_state')
+/*
+Users.then(function(users) {
+  console.log(Object.keys(users).map(x=>(users[x].email)))
+})
+*/
 
 test('Users & States', () => {
-  return Promise.all([connection.ItsmStates, connection.Users]).then(function([states, users]) {
+  return Promise.all([ItsmStates, Users]).then(function([states, users]) {
     expect(states['15']).toHaveProperty('value', 'Awaiting Input')
     expect(states['15']).toHaveProperty('itsm_type', 'Incident')
     expect(users['3108123']).toHaveProperty('email', 'aviran.hayun+1@samanage.com')
   })
 })
 
-
+/*
 test('create Incident', ()=>{
   const name = 'opened with samanage-api-js library promises ' + Date.now()
   return expect(connection.callSamanageAPI(
@@ -73,12 +79,13 @@ test('Get incidents created between dates with pagination', ()=>{
     )
   })
 })
+*/
 
-
-test('Users', () => {
-  connection.Users.then(function(users) {
+test('Users', (done) => {
+  Users.then(function(users) {
     //console.log(Object.keys(users).map(x=>(users[x].email)))
     expect(users['81']).toHaveProperty('email', 'michael@samanage.com')
+    done()
   })
 })
 
