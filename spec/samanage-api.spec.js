@@ -9,8 +9,8 @@ var connection = new SamanageAPI.Connection(process.env.TOKEN, 'https://api.sama
 
 //SamanageAPI.debug = true
 var get_incidents = SamanageAPI.get('incident')
-var Users = connection.addMetadata('user')
-var ItsmStates = connection.addMetadata('itsm_state')
+var Users = connection.getter('user')
+var ItsmStates = connection.getter('itsm_state')
 /*
 Users.then(function(users) {
   console.log(Object.keys(users).map(x=>(users[x].email)))
@@ -25,7 +25,6 @@ test('Users & States', () => {
   })
 })
 
-/*
 test('create Incident', ()=>{
   const name = 'opened with samanage-api-js library promises ' + Date.now()
   return expect(connection.callSamanageAPI(
@@ -79,7 +78,6 @@ test('Get incidents created between dates with pagination', ()=>{
     )
   })
 })
-*/
 
 test('Users', (done) => {
   Users.then(function(users) {
