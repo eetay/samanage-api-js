@@ -33,7 +33,7 @@ var request = get_incidents(
     created: ['2018-01-01','2018-01-02']
   })
 )
-SamanageAPI.callSamanageAPI(...)
+connection.callSamanageAPI(...)
 ```
 
 ### Building filters
