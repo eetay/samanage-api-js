@@ -1,5 +1,14 @@
 # samanage-api
 
+<script src="https://embed.runkit.com" data-element-id="my-element"></script>
+
+<!-- anywhere else on your page -->
+<div id="my-element">// GeoJSON!
+var getJSON = require("async-get-json");
+
+await getJSON("https://storage.googleapis.com/maps-devrel/google.json");</div>
+
+
 This is my personal helper code for performing API calls to Samanage Helpdesk Service. The code is provided as-is, without any warrenty.
 It is a work in progress and may not support all the options offered by the Samanage API
 Feel free to contact me with requests, issues or questions.
