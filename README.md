@@ -10,13 +10,13 @@ npm install samanage-api
 ```
 
 ## Initialize
-```javascrip
+```javascript
 var SamanageAPI = require('samanage-api')
 var connection = new SamanageAPI.Connection(process.env.TOKEN)
 ```
 
 ## Making a call
-```javascrip
+```javascript
 var success = function(data) {...}
 var failure = function(error) {...}
 var request = ...  
