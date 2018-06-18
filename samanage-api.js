@@ -49,6 +49,7 @@ var SamanageAPI = {
         method: request.get
       }
     }
+    action.log = SamanageAPI.log
     action.object_type = object_type
     action.scope = scope
     return action
@@ -66,6 +67,7 @@ var SamanageAPI = {
         method: request.post
       }
     }
+    action.log = SamanageAPI.log
     action.object_type = object_type
     action.scope = scope
     return action
@@ -83,6 +85,7 @@ var SamanageAPI = {
         method: request.put
       }
     }
+    action.log = SamanageAPI.log
     action.object_type = object_type
     action.scope = scope
     return action
@@ -105,43 +108,47 @@ var SamanageAPI = {
 }
 
 function promiseToGetNextPage(result, connection, action, filters) {
+  var log = action.log
   var current_filters = filters ? filters.clone() : new SamanageAPI.Filters()
-  var promise = new Promise(function(resolve, reject) {
+  var ref = connection.origin + '/' + action(current_filters).path
+  var promise = new Promise(function(res, rej) {
     var add_data = function({data, ref, pagination_info}) {
-      var rej = reject
+      log(ref + ': CALL PROMISE RESOLVED')
       var path = ref
       if (data.length > 0) {
-        SamanageAPI.log(ref + ': recieved ' + data.length + 'new items on ' + path)
+        log(ref + ': recieved ' + data.length + 'new items on ' + path)
         data.forEach(function(item) { 
           result[item.id] = item 
         })
         next_page_filters = current_filters.clone().next_page()
         if (pagination_info.total_pages >= next_page_filters.attrs.page) {
           promiseToGetNextPage(result, connection, action, next_page_filters).then(function(x) {
-            SamanageAPI.log(ref + 'PROMISE RESOLVED')
-            resolve(result)
+            log(ref + ': PROMISE RESOLVED')
+            res(result)
           }).catch(rej)
         }
         else {
-          SamanageAPI.log(ref + ': RESOLVED NO PAGINATION')
-          resolve(result)
+          log(ref + ': RESOLVED NO PAGINATION')
+          res(result)
         }
       }
       else {
-        SamanageAPI.log(ref + ': RESOLVED WITH PAGINATION')
-        resolve(result)
+        log(ref + ': RESOLVED WITH PAGINATION')
+        res(result)
       }
     }
-    var path = action(current_filters).path
-    SamanageAPI.log('promiseToGetNextPage page#' + current_filters.attrs.page, connection.origin + '/' + path)
-    connection.callSamanageAPI(action(current_filters), path).then(add_data).catch(reject)
+    log('promiseToGetNextPage page#' + current_filters.attrs.page, '; ref:', ref)
+    connection.callSamanageAPI(action(current_filters), ref).then(add_data).catch(function (err) {
+      log(ref + ': CALL PROMISE REJECTED: ')
+      rej(err)
+    })
   })
   return promise
 }
 
 SamanageAPI.Connection.prototype = {
-  getter: function(object_type, filters) {
-    return promiseToGetNextPage({}, this, SamanageAPI.get(object_type), filters)
+  getter: function(object_type, filters, scope) {
+    return promiseToGetNextPage({}, this, SamanageAPI.get(object_type, scope), filters)
   },
   callSamanageAPI: function(action, ref) {
     var connection = this
@@ -215,6 +222,14 @@ SamanageAPI.Filters.prototype = {
   },
   per_page: function(per_page) {
     this.attrs['per_page'] = per_page
+    return this
+  },
+  department: function(department_id) {
+    this.attrs['department'] = department_id
+    return this
+  },
+  title: function(title) {
+    this.attrs['title'] = title
     return this
   },
   to_query: function() {
