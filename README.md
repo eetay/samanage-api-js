@@ -4,6 +4,8 @@ This is my personal helper code for performing API calls to Samanage Helpdesk Se
 It is a work in progress and may not support all the options offered by the Samanage API
 Feel free to contact me with requests, issues or questions.
 
+[Try it](https://npm.runkit.com/samanage-api)
+
 ## Installation
 ```sh
 npm install samanage-api
