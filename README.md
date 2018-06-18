@@ -83,6 +83,8 @@ var users_filter = new SamanageAPI.Filter()
 var users = connection.getter('user', users_filter)
 
 var itsm_states = connection.getter('itsm_state')
+
+var comments = connection.getter('comment', (new SamanageAPI.Filters()), 'incidents/' + incident.id)
 ```
 
 ### do something when users and itsm states are both available
