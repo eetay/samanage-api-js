@@ -12,9 +12,11 @@ npm install samanage-api
 ```
 
 ## Initialize
+You will need a Samanage API token. [How to get a token](https://community.samanage.com/docs/DOC-1459-encrypted-tokens-authentication-for-api-integration-overview)
+
 ```javascript
 var SamanageAPI = require('samanage-api')
-var connection = new SamanageAPI.Connection(process.env.TOKEN)
+var connection = new SamanageAPI.Connection("your-token-here")
 ```
 
 ## Making a call
@@ -64,19 +66,27 @@ var request = SamanageAPI.create('incident')({
 })
 ```
 
-## help
+## Help
+
+SamanageAPI has built in help. 
+Open a new node console, and execute this:
 
 ```javascript
+var SamanageAPI = require('samanage-api')
 console.log(SamanageAPI.help)
 console.log(SamanageAPI.Filters.help)
 console.log(SamanageAPI.ItsmStates.help)
 console.log(SamanageAPI.Connection.help)
 ```
 
-### define getter objects
-getter objects are promises to get all items of certain type
-be careful not to try retrieving too many items; currently there's no check on
-number of items which will cause long retrieval process
+### Getter objects
+Getter objects are promises to get all items of certain type that match a specific `SamanageAPI.Filter`.
+Getters are very convenient way of retrieving things like Itsm States or Users,
+but may not be proper strategy for retrieving very large sets of items
+(e.g. all audit logs since start of time); 
+Currently there's no check on number of items which will cause a very long retrieval process so just go ahead and experiment
+
+Getters are defined like this:
 
 ```javascript
 var users_filter = new SamanageAPI.Filter()
@@ -87,27 +97,11 @@ var itsm_states = connection.getter('itsm_state')
 var comments = connection.getter('comment', (new SamanageAPI.Filters()), 'incidents/' + incident.id)
 ```
 
-### do something when users and itsm states are both available
+Example: Do something after both users and itsm states are retrieved
+
 ```javascript
 Promise.all([itsm_states, users]).then(
   function([states, users]) {...}
 )
 ```
 
-
-
-## Migrating from 1.x to 2.x
-Changes in version 2.0
-- works with promises
-- conenction is now instantiated (you can open connections to multiple accounts or mulitple users in same account)
-- support for ItsmStates
-
-```javascript
-var connection = new SamanageAPI.connection(process.env.TOKEN)
-SamanageAPI.callSamanageAPI(connection, request, success, failure)
-```
-=>
-```javascript
-var connection = new SamanageAPI.Connection(process.env.TOKEN)
-connection.callSamanageAPI(request).then(success).catch(failure)
-```
