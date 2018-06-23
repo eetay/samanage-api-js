@@ -79,7 +79,7 @@ console.log(SamanageAPI.ItsmStates.help)
 console.log(SamanageAPI.Connection.help)
 ```
 
-### Getter objects
+## Getter objects
 Getter objects are promises to get all items of certain type that match a specific `SamanageAPI.Filter`.
 Getters are very convenient way of retrieving things like Itsm States or Users,
 but may not be proper strategy for retrieving very large sets of items
