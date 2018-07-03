@@ -1,5 +1,5 @@
 var request = require('request')
-var urlx = require('url')
+urlx = require('url')
 path = require('path')
 
 var isFunction = (obj) => (!!(obj && obj.constructor && obj.call && obj.apply))
