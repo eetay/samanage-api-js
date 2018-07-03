@@ -16,6 +16,8 @@
   },
   "homepage": "https://github.com/eetay/samanage-api-js/blob/master/README.md",
   "devDependencies": {
+    "eslint": "4.15.0",
+    "eslint-plugin-react": "7.10.0",
     "jest": "23.1.0"
   },
   "scripts": {
