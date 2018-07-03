@@ -40,7 +40,7 @@ var SamanageAPI = {
     })
   },
   get: function(object_type, scope) {
-    action = function(filters) {
+    var action = function(filters) {
       SamanageAPI.validateParams('get(filters)', arguments, [/object/])
       return {
         object_type: object_type,
@@ -55,7 +55,7 @@ var SamanageAPI = {
     return action
   },
   create: function(object_type, scope) {
-    action = function(object) {
+    var action = function(object) {
       SamanageAPI.validateParams('create(object)', arguments, [/object/])
       var wrapper = {}
       wrapper[object_type] = object
@@ -73,7 +73,7 @@ var SamanageAPI = {
     return action
   },
   update: function(object_type, scope) {
-    action = function(object_id, object) {
+    var action = function(object_id, object) {
       SamanageAPI.validateParams('update(object_id, object)', arguments, [/string|number/, /object/])
       var wrapper = {}
       wrapper[object_type] = object
@@ -107,6 +107,7 @@ var SamanageAPI = {
   }
 }
 
+// TODO: change this recursive code to simpler form
 function promiseToGetNextPage(result, connection, action, filters) {
   var log = action.log
   var current_filters = filters ? filters.clone() : new SamanageAPI.Filters()
@@ -120,9 +121,9 @@ function promiseToGetNextPage(result, connection, action, filters) {
         data.forEach(function(item) { 
           result[item.id] = item 
         })
-        next_page_filters = current_filters.clone().next_page()
+        var next_page_filters = current_filters.clone().next_page()
         if (pagination_info.total_pages >= next_page_filters.attrs.page) {
-          promiseToGetNextPage(result, connection, action, next_page_filters).then(function(x) {
+          promiseToGetNextPage(result, connection, action, next_page_filters).then(function(_unused) {
             log(ref + ': PROMISE RESOLVED')
             res(result)
           }).catch(rej)
@@ -170,7 +171,7 @@ SamanageAPI.Connection.prototype = {
           reject({error: error, ref: ref})
         } else try {
           SamanageAPI.log('callSamanageAPI ok:', body.substring(0,100), response.headers)
-          pagination_info = SamanageAPI.getPaginationInfo(response.headers)
+          var pagination_info = SamanageAPI.getPaginationInfo(response.headers)
           resolve({data: JSON.parse(body), ref: ref, pagination_info: pagination_info})
         } catch(e) {
           SamanageAPI.log('callSamanageAPI exception:', ref, e)
