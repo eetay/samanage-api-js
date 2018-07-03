@@ -5,7 +5,7 @@ function log() {
 process.on('unhandledRejection', function(error, promise) {
     console.error('UNHANDLED REJECTION - Promise: ', promise, ', Error: ', error, ').');
 });
-SamanageAPI = require('../samanage-api.js')
+var SamanageAPI = require('../samanage-api.js')
 if (typeof process.env.TOKEN == 'undefined') throw 'Error: for tests api token must be set using "export TOKEN=" shell command to account #5 in production'
 
 var connection = new SamanageAPI.Connection(process.env.TOKEN, 'https://api.samanage.com')

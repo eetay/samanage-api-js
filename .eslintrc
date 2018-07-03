@@ -12,7 +12,8 @@
         }
     },
     "plugins": [
-        "react"
+        "react",
+        "jest"
     ],
     "rules": {
         "accessor-pairs": "error",
