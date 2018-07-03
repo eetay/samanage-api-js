@@ -1,6 +1,6 @@
 var request = require('request')
 var urlx = require('url')
-var path = require('path')
+path = require('path')
 
 var isFunction = (obj) => (!!(obj && obj.constructor && obj.call && obj.apply))
 var functionProto = (name, func) => (name + func.toString().match(/\(.*\)/)[0])
