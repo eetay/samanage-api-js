@@ -107,52 +107,62 @@ var SamanageAPI = {
   }
 }
 
-// TODO: change this recursive code to simpler form
-function promiseToGetNextPage(result, connection, action, filters) {
-  var log = action.log
+function getterAddData({data, ref, pagination_info}) {
+  var state = ref
+  //console.log('add_data: ', data, 'state: ', state)
+  var connection = state.connection
+  var log = state.log
+  var filters = state.filters
   var current_filters = filters ? filters.clone() : new SamanageAPI.Filters()
-  var ref = connection.origin + '/' + action(current_filters).path
-  var promise = new Promise(function(res, rej) {
-    var add_data = function({data, ref, pagination_info}) {
-      log(ref + ': CALL PROMISE RESOLVED')
-      var path = ref
-      if (data.length > 0) {
-        log(ref + ': recieved ' + data.length + 'new items on ' + path)
-        data.forEach(function(item) { 
-          result[item.id] = item 
-        })
-        var next_page_filters = current_filters.clone().next_page()
-        if (pagination_info.total_pages >= next_page_filters.attrs.page) {
-          promiseToGetNextPage(result, connection, action, next_page_filters).then(function(_unused) {
-            log(ref + ': PROMISE RESOLVED')
-            res(result)
-          }).catch(rej)
-        }
-        else {
-          log(ref + ': RESOLVED NO PAGINATION')
-          res(result)
-        }
-      }
-      else {
-        log(ref + ': RESOLVED WITH PAGINATION')
-        res(result)
-      }
-    }
-    log('promiseToGetNextPage page#' + current_filters.attrs.page, '; ref:', ref)
-    connection.callSamanageAPI(action(current_filters), ref).then(add_data).catch(function (err) {
-      log(ref + ': CALL PROMISE REJECTED: ')
-      rej(err)
+  var ref = 'ADD_DATA_URL:' + connection.origin + '/' + state.action(current_filters).path
+  if (data.length > 0) {
+    log(ref + ': recieved ' + data.length + ' new items')
+    data.forEach(function(item) {
+      state.data[item.id] = item
     })
-  })
-  return promise
+    var next_page_filters = current_filters.clone().next_page()
+    state.filters = next_page_filters
+    if (pagination_info.total_pages >= next_page_filters.attrs.page) {
+      log(ref + ': next page:' + next_page_filters.attrs.page)
+      connection.callSamanageAPI(state.action(next_page_filters), state).then(
+        getterAddData
+      ).catch(function (err) {
+        log(ref + ': REJECTED: ' + err)
+        state.reject(err)
+      })
+    }
+    else {
+      log(ref + ': RESOLVED (no pagination)')
+      state.resolve(state.data)
+    }
+  }
+  else {
+    log(ref + ': RESOLVED (empty page)')
+    state.resolve(state.data)
+  }
 }
 
 SamanageAPI.Connection.prototype = {
-  getter: function(object_type, filters, scope) {
-    return promiseToGetNextPage({}, this, SamanageAPI.get(object_type, scope), filters)
+  getter: function(object_type, filters, scope, getter_log) {
+    var connection = this
+    var promise = new Promise(function(res, rej) {
+      var state = {
+        data: {},
+        action: SamanageAPI.get(object_type, scope),
+        filters: filters,
+        connection: connection,
+        resolve: res,
+        reject: rej
+      }
+      var action = state.action(filters || new SamanageAPI.Filters())
+      state.log = getter_log || SamanageAPI.log
+      connection.callSamanageAPI(action, state).then(getterAddData)
+    })
+    return promise
   },
   callSamanageAPI: function(action, ref) {
     var connection = this
+    var log = action.log || SamanageAPI.log
     return new Promise(function(resolve, reject) {
       var options = {
         followAllRedirects: true,
@@ -161,20 +171,20 @@ SamanageAPI.Connection.prototype = {
       }
       ref = ref || options.url
       if (action.body) options['body'] = action.body
-      SamanageAPI.log('callSamanageAPI:', ref, options, action)
+      log('callSamanageAPI:', { ref: ref, options: options, action: action })
       action.method(options, function(error, response, body) {
         if (response && response.statusCode != 200) {
-          SamanageAPI.log('callSamanageAPI HTTP error:', ref, response.statusCode)
+          log('callSamanageAPI HTTP error:', ref, response.statusCode)
           reject({error: 'HTTP Error', httpStatus: (response && response.statusCode), info: body, ref: ref})
         } else if (error) {
-          SamanageAPI.log('callSamanageAPI error:', ref, error)
+          log('callSamanageAPI error:', ref, error)
           reject({error: error, ref: ref})
         } else try {
-          SamanageAPI.log('callSamanageAPI ok:', body.substring(0,100), response.headers)
+          log('callSamanageAPI ok:', {ref: ref, body: body.substring(0,100), headers: response.headers})
           var pagination_info = SamanageAPI.getPaginationInfo(response.headers)
           resolve({data: JSON.parse(body), ref: ref, pagination_info: pagination_info})
         } catch(e) {
-          SamanageAPI.log('callSamanageAPI exception:', ref, e)
+          log('callSamanageAPI exception:', ref, e)
           reject({error: 'Invalid JSON response data', info: body, ref: ref, exception: e})
         }
       })

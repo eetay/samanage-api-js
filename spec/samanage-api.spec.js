@@ -13,6 +13,13 @@ var connection = new SamanageAPI.Connection(process.env.TOKEN, 'https://api.sama
 //SamanageAPI.debug = true
 var get_incidents = SamanageAPI.get('incident')
 
+/*
+var Incidents = connection.getter('incident', (new SamanageAPI.Filters()).page(50).per_page(100), undefined, console.log)
+Incidents.then(function (incidents) {
+  console.log('DONE!!!!:', Object.keys(incidents).length)
+})
+*/
+
 test('Incident getter by title with comments getter', () => {
   expect.assertions(1)
   var Incidents = connection.getter('incident', (new SamanageAPI.Filters()).title('*new*'))
@@ -116,3 +123,4 @@ test('Generated help', function() {
     expect(typeof obj.help).toBe('object')
   })
 })
+
