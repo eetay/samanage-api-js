@@ -1,6 +1,6 @@
 {
   "name": "samanage-api",
-  "version": "2.2.3",
+  "version": "2.3.0",
   "description": "Library for performing API calls to Samanage Helpdesk Service",
   "main": "samanage-api.js",
   "repository": "git@github.com:eetay/samanage-api-js.git",
