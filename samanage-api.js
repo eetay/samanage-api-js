@@ -143,6 +143,9 @@ function getterAddData({data, ref, pagination_info}) {
 }
 
 SamanageAPI.Connection.prototype = {
+  HTTP_ERROR: 'HTTP Error',
+  NON_HTTP_ERROR: 'Non HTTP Error',
+  INVALID_JSON: 'Invalid JSON response data',
   getter: function(object_type, filters, scope, getter_log) {
     var connection = this
     var promise = new Promise(function(res, rej) {
@@ -175,17 +178,34 @@ SamanageAPI.Connection.prototype = {
       action.method(options, function(error, response, body) {
         if (response && response.statusCode != 200) {
           log('callSamanageAPI HTTP error:', ref, response.statusCode)
-          reject({error: 'HTTP Error', httpStatus: (response && response.statusCode), info: body, ref: ref})
+          reject({
+            error: this.HTTP_ERROR,
+            httpStatus: (response && response.statusCode),
+            info: body,
+            ref: ref
+          })
         } else if (error) {
           log('callSamanageAPI error:', ref, error)
-          reject({error: error, ref: ref})
+          reject({
+            error: this.NON_HTTP_ERROR,
+            info: error,
+            ref: ref
+          })
         } else try {
           log('callSamanageAPI ok:', {ref: ref, body: body.substring(0,100), headers: response.headers})
-          var pagination_info = SamanageAPI.getPaginationInfo(response.headers)
-          resolve({data: JSON.parse(body), ref: ref, pagination_info: pagination_info})
+          resolve({
+            data: JSON.parse(body),
+            ref: ref,
+            pagination_info: SamanageAPI.getPaginationInfo(response.headers)
+          })
         } catch(e) {
           log('callSamanageAPI exception:', ref, e)
-          reject({error: 'Invalid JSON response data', info: body, ref: ref, exception: e})
+          reject({
+            error: this.INVALID_JSON,
+            info: body,
+            ref: ref,
+            exception: e
+          })
         }
       })
     })

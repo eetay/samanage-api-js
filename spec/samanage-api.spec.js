@@ -124,3 +124,4 @@ test('Generated help', function() {
   })
 })
 
+console.log(SamanageAPI.Connection.help)
