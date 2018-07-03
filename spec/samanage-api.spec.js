@@ -111,10 +111,8 @@ test('Get incidents created between dates with pagination', ()=>{
   })
 })
 
-/*
-describe('help', function() {
-  console.log(SamanageAPI.help)
-  console.log(SamanageAPI.Filters.help)
-  console.log(SamanageAPI.Connection.help)
+test('Generated help', function() {
+  [SamanageAPI, SamanageAPI.Filters, SamanageAPI.Connection].forEach(function(obj) {
+    expect(typeof obj.help).toBe('object')
+  })
 })
-*/

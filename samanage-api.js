@@ -17,7 +17,7 @@ function describeObject(obj) {
       }
     }
   })
-  ret.push({constants: consts})
+  if (consts.length > 0) ret.push({constants: consts})
   return ret
 }
 
