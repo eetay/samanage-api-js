@@ -2,8 +2,7 @@
     "env": {
         "browser": false,
         "node" : true,
-        "es6": true,
-        "jest": true
+        "es6": true
     },
     "extends": "eslint:recommended",
     "parserOptions": {
@@ -12,10 +11,12 @@
             "jsx": true
         }
     },
-    "plugins": [
-        "react",
-        "jest"
-    ],
+    "plugins": [ "react" ],
+    "overrides": [{
+      "files": [ "spec/*.js" ],
+      "env": { "jest": true },
+      "plugins": [ "jest" ]
+    }],
     "rules": {
         "accessor-pairs": "error",
         "array-bracket-newline": "off",

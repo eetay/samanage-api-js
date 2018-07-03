@@ -75,9 +75,6 @@ test('Incident which does not exist return 404', ()=>{
   )).rejects.toHaveProperty('httpStatus', 404)
 })
 
-
-var get_incidents = SamanageAPI.get('incident')
-
 test('Get incidents created between dates', ()=>{
   return expect(connection.callSamanageAPI(
     get_incidents(
