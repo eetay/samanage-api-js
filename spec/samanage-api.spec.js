@@ -23,7 +23,7 @@ test('Incident getter by title with comments getter', () => {
     expect.assertions(1)
     var Comments = connection.getter('comment', (new SamanageAPI.Filters()), 'incidents/' + incident.id)
     Comments.then(function(comments) {
-      bodies = Object.keys(comments).map(x=>(comments[x].body))
+      var bodies = Object.keys(comments).map(x=>(comments[x].body))
       expect(bodies.length).toEqual(2)
       log(bodies)
     })
@@ -35,7 +35,7 @@ test('Users getter', () => {
   //expect.assertions(1)
   var Users = connection.getter('user', (new SamanageAPI.Filters()).page(1))
   Users.then(function(users) {
-    emails = Object.keys(users).map(x=>(users[x].email))
+    var emails = Object.keys(users).map(x=>(users[x].email))
     expect(users['3024324']).toHaveProperty('email', 'eetay.natan+qualys@samanage.com')
     log(emails)
   })
