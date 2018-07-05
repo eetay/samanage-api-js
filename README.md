@@ -4,6 +4,8 @@ This is my personal helper code for performing API calls to Samanage Helpdesk Se
 It is a work in progress and may not support all the options offered by the Samanage API
 Feel free to contact me with requests, issues or questions.
 
+samanage-api's code quality is tested with [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b37abcd47e7a4753811ab872e644211a)](https://www.codacy.com/app/eetay/samanage-api-js?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=eetay/samanage-api-js&amp;utm_campaign=Badge_Grade)
+
 [Try it](https://npm.runkit.com/samanage-api)
 
 ## Installation
