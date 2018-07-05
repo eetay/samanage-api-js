@@ -163,19 +163,19 @@ SamanageAPI.Connection.prototype = {
     })
     return promise
   },
-  callSamanageAPI: function(action, ref) {
+  callSamanageAPI: function(request, ref) {
     var connection = this
-    var log = action.log || SamanageAPI.log
+    var log = request.log || SamanageAPI.log
     return new Promise(function(resolve, reject) {
       var options = {
         followAllRedirects: true,
-        url: urlx.resolve(connection.origin, action.path),
+        url: urlx.resolve(connection.origin, request.path),
         headers: connection.headers
       }
       ref = ref || options.url
-      if (action.body) options['body'] = action.body
-      log('callSamanageAPI:', { ref: ref, options: options, action: action })
-      action.method(options, function(error, response, body) {
+      if (request.body) options['body'] = request.body
+      log('callSamanageAPI:', { ref: ref, options: options, request: request })
+      request.method(options, function(error, response, body) {
         if (response && response.statusCode != 200) {
           log('callSamanageAPI HTTP error:', ref, response.statusCode)
           reject({

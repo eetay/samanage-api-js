@@ -75,14 +75,13 @@ var request = SamanageAPI.create('incident')({
 
 ## Help
 
-SamanageAPI has built in help. 
+SamanageAPI has built in help.
 Open a new node console, and execute this:
 
 ```javascript
 var SamanageAPI = require('samanage-api')
 console.log(SamanageAPI.help)
 console.log(SamanageAPI.Filters.help)
-console.log(SamanageAPI.ItsmStates.help)
 console.log(SamanageAPI.Connection.help)
 ```
 
@@ -90,7 +89,7 @@ console.log(SamanageAPI.Connection.help)
 Getter objects are promises to get all items of certain type that match a specific `SamanageAPI.Filter`.
 Getters are very convenient way of retrieving things like Itsm States or Users,
 but may not be proper strategy for retrieving very large sets of items
-(e.g. all audit logs since start of time); 
+(e.g. all audit logs since start of time);
 Currently there's no check on number of items which will cause a very long retrieval process so just go ahead and experiment
 
 Getters are defined like this:
