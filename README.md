@@ -95,11 +95,14 @@ Currently there's no check on number of items which will cause a very long retri
 Getters are defined like this:
 
 ```javascript
-var users_filter = new SamanageAPI.Filter()
-var users = connection.getter('user', users_filter)
-
+// promise to get all ITSM states:
 var itsm_states = connection.getter('itsm_state')
 
+// promise to get all users created between certain dates
+var users_filter = (new SamanageAPI.Filter()).between_dates('created','2017-01-01','2018-07-07')
+var users = connection.getter('user', users_filter)
+
+// promise to get all comments of particular incident
 var comments = connection.getter('comment', (new SamanageAPI.Filters()), 'incidents/' + incident.id)
 ```
 
