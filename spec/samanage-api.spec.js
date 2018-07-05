@@ -122,6 +122,6 @@ test('Generated help', function() {
   [SamanageAPI, SamanageAPI.Filters, SamanageAPI.Connection].forEach(function(obj) {
     expect(typeof obj.help).toBe('object')
   })
+  expect(SamanageAPI.Connection.help).toEqual(expect.arrayContaining([expect.stringContaining('callSamanageAPI(action, ref)')]))
 })
 
-console.log(SamanageAPI.Connection.help)
