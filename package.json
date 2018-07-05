@@ -9,7 +9,13 @@
   "keywords": [
     "Samanage",
     "samanage",
-    "api"
+    "javascript",
+    "api",
+    "service desk",
+    "incidents",
+    "samanage.js",
+    "ticketing",
+    "helpdesk"
   ],
   "dependencies": {
     "request": "2.87.0"
@@ -21,6 +27,9 @@
     "eslint-plugin-jest": "21.17.0",
     "eslint-plugin-react": "7.10.0",
     "jest": "23.2.0"
+  },
+  "bugs" : {
+    "url": "https://github.com:eetay/samanage-api-js/issues"
   },
   "scripts": {
     "test": "jest --detectOpenHandles"

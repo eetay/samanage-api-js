@@ -21,11 +21,18 @@ var connection = new SamanageAPI.Connection("your-token-here")
 
 ## Making a call
 ```javascript
-var success = function(data) {...}
-var failure = function(error) {...}
-var request = ...  
+var success = function({data, ref, pagination_info}) {...}
+var failure = function({error, info, httpStatus, ref}) {...}
+var request = ... // see below different requests
 connection.callSamanageAPI(request).then(success).catch(failure)
 ```
+
+setting value for 'ref':
+```javascript
+var my_ref = 'whatever custom information. can also be of any type'
+connection.callSamanageAPI(request, my_ref).then(success).catch(failure)
+```
+
 
 ## Retrieval with filters
 ```javascript
