@@ -114,30 +114,30 @@ function getterAddData({data, ref, pagination_info}) {
   var log = state.log
   var filters = state.filters
   var current_filters = filters ? filters.clone() : new SamanageAPI.Filters()
-  var ref = 'ADD_DATA_URL:' + connection.origin + '/' + state.action(current_filters).path
+  var transaction_ref = 'ADD_DATA_URL:' + connection.origin + '/' + state.action(current_filters).path
   if (data.length > 0) {
-    log(ref + ': recieved ' + data.length + ' new items')
+    log(transaction_ref + ': recieved ' + data.length + ' new items')
     data.forEach(function(item) {
       state.data[item.id] = item
     })
     var next_page_filters = current_filters.clone().next_page()
     state.filters = next_page_filters
     if (pagination_info.total_pages >= next_page_filters.attrs.page) {
-      log(ref + ': next page:' + next_page_filters.attrs.page)
+      log(transaction_ref + ': next page:' + next_page_filters.attrs.page)
       connection.callSamanageAPI(state.action(next_page_filters), state).then(
         getterAddData
       ).catch(function (err) {
-        log(ref + ': REJECTED: ' + err)
+        log(transaction_ref + ': REJECTED: ' + err)
         state.reject(err)
       })
     }
     else {
-      log(ref + ': RESOLVED (no pagination)')
+      log(transaction_ref + ': RESOLVED (no pagination)')
       state.resolve(state.data)
     }
   }
   else {
-    log(ref + ': RESOLVED (empty page)')
+    log(transaction_ref + ': RESOLVED (empty page)')
     state.resolve(state.data)
   }
 }
