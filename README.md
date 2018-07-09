@@ -1,10 +1,10 @@
 # samanage-api
 
-This is my personal helper code for performing API calls to Samanage Helpdesk Service. The code is provided as-is, without any warrenty.
+This is my personal API library for performing calls to [The Samanage Service Platform](https://www.samanage.com/service-desk/). The code is provided as-is, without any warrenty.
 It is a work in progress and may not support all the options offered by the Samanage API
 Feel free to contact me with requests, issues or questions.
 
-samanage-api's code quality is tested with [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b37abcd47e7a4753811ab872e644211a)](https://www.codacy.com/app/eetay/samanage-api-js?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=eetay/samanage-api-js&amp;utm_campaign=Badge_Grade) and jest unit tests
+samanage-api code is reviewed with [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b37abcd47e7a4753811ab872e644211a)](https://www.codacy.com/app/eetay/samanage-api-js?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=eetay/samanage-api-js&amp;utm_campaign=Badge_Grade) and jest unit tests
 
 [Try it](https://npm.runkit.com/samanage-api)
 
@@ -14,7 +14,7 @@ npm install samanage-api
 ```
 
 ## Initialize
-You will need a Samanage API token. [How to get a token](https://community.samanage.com/docs/DOC-1459-encrypted-tokens-authentication-for-api-integration-overview)
+You will need a Samanage API token.  [How to get a token](https://community.samanage.com/docs/DOC-1459-encrypted-tokens-authentication-for-api-integration-overview)
 
 ```javascript
 var SamanageAPI = require('samanage-api')

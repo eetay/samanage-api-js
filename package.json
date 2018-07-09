@@ -22,10 +22,10 @@
   },
   "homepage": "https://github.com/eetay/samanage-api-js/blob/master/README.md",
   "devDependencies": {
-    "global": "4.3.2",
     "eslint": "4.15.0",
     "eslint-plugin-jest": "21.17.0",
     "eslint-plugin-react": "7.10.0",
+    "global": "4.3.2",
     "jest": "23.2.0"
   },
   "bugs": {
