@@ -164,15 +164,18 @@ SamanageAPI.Connection.prototype = {
     })
     return promise
   },
-  retrySamanageAPI(request, ref, retry_opts) {
-    return promiseRetry(function (retry, number) {
-      //console.log('attempt number', number);
-      return connection.callSamanageAPI(request, 'ref').catch(function(err) {
-        //console.log(err)
-        if (retry(err)) return
-        throw err
-      })
-    }, retry_opts||request.retry_opts||connection.retry_opts)
+  retrySamanageAPI: function(request, ref, retry_opts) {
+    return promiseRetry(
+      function (retry, number) {
+        //console.log('attempt number', number);
+        return connection.callSamanageAPI(request, 'ref').catch(function(err) {
+          //console.log(err)
+          if (retry(err)) return
+          throw err
+        })
+      }, 
+      (retry_opts || request.retry_opts || connection.retry_opts)
+    )
   },
   callSamanageAPI: function(request, ref) {
     var connection = this
