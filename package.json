@@ -18,6 +18,7 @@
     "helpdesk"
   ],
   "dependencies": {
+    "promise-retry": "1.1.1",
     "request": "2.87.0"
   },
   "homepage": "https://github.com/eetay/samanage-api-js/blob/master/README.md",

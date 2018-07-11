@@ -4,7 +4,8 @@ This is my personal API library for performing calls to [The Samanage Service Pl
 It is a work in progress and may not support all the options offered by the Samanage API
 Feel free to contact me with requests, issues or questions.
 
-samanage-api code is reviewed with [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b37abcd47e7a4753811ab872e644211a)](https://www.codacy.com/app/eetay/samanage-api-js?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=eetay/samanage-api-js&amp;utm_campaign=Badge_Grade) and jest unit tests
+samanage-api code is reviewed with [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b37abcd47e7a4753811ab872e644211a)](https://www.codacy.com/app/eetay/samanage-api-js?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=eetay/samanage-api-js&amp;utm_campaign=Badge_Grade)
+and unit tested with <img src="./spec/jest.png" alt="Jest" width="32px"/>
 
 [Try it](https://npm.runkit.com/samanage-api)
 
@@ -29,12 +30,26 @@ var request = ... // see below different requests
 connection.callSamanageAPI(request).then(success).catch(failure)
 ```
 
-setting value for 'ref':
+### Setting value for 'ref'
+The 'ref' attribute in the success and failure callbacks can be set during the
+call itself, like so:
+
 ```javascript
 var my_ref = 'whatever custom information. can also be of any type'
 connection.callSamanageAPI(request, my_ref).then(success).catch(failure)
 ```
 
+### Retries
+```javascript
+var retry_opts = { // see 'retry' npm module for full documentation
+  retries: 3,
+  factor: 2,
+  minTimeout: 1 * 100,
+  maxTimeout: 60 * 100,
+  randomize: true,
+}
+connection.retrySamanageAPI(request, ref, retry_opts).then(success).catch(failure)
+```
 
 ## Retrieval with filters
 ```javascript
@@ -75,7 +90,7 @@ var request = SamanageAPI.create('incident')({
 })
 ```
 
-## Help
+## List of all functions and constants
 
 SamanageAPI has built in help.
 Open a new node console, and execute this:
