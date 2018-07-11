@@ -1,6 +1,7 @@
 var request = require('request')
 var urlx = require('url')
 var path = require('path')
+var promiseRetry = require('promise-retry')
 
 var isFunction = (obj) => (!!(obj && obj.constructor && obj.call && obj.apply))
 var functionProto = (name, func) => (name + func.toString().match(/\(.*\)/)[0])
@@ -163,6 +164,19 @@ SamanageAPI.Connection.prototype = {
     })
     return promise
   },
+  retrySamanageAPI: function(request, ref, retry_opts) {
+    return promiseRetry(
+      function (retry, number) {
+        //console.log('attempt number', number);
+        return connection.callSamanageAPI(request, 'ref').catch(function(err) {
+          //console.log(err)
+          if (retry(err)) return
+          throw err
+        })
+      }, 
+      (retry_opts || request.retry_opts || connection.retry_opts)
+    )
+  },
   callSamanageAPI: function(request, ref) {
     var connection = this
     var log = request.log || SamanageAPI.log
@@ -179,7 +193,7 @@ SamanageAPI.Connection.prototype = {
         if (response && response.statusCode != 200) {
           log('callSamanageAPI HTTP error:', ref, response.statusCode)
           reject({
-            error: this.HTTP_ERROR,
+            error: connection.HTTP_ERROR,
             httpStatus: (response && response.statusCode),
             info: body,
             ref: ref
@@ -187,7 +201,7 @@ SamanageAPI.Connection.prototype = {
         } else if (error) {
           log('callSamanageAPI error:', ref, error)
           reject({
-            error: this.NON_HTTP_ERROR,
+            error: connection.NON_HTTP_ERROR,
             info: error,
             ref: ref
           })
@@ -201,7 +215,7 @@ SamanageAPI.Connection.prototype = {
         } catch(e) {
           log('callSamanageAPI exception:', ref, e)
           reject({
-            error: this.INVALID_JSON,
+            error: connection.INVALID_JSON,
             info: body,
             ref: ref,
             exception: e
@@ -211,8 +225,6 @@ SamanageAPI.Connection.prototype = {
     })
   }
 }
-
-
 
 SamanageAPI.Filters.prototype = {
   DESC: false,
