@@ -146,7 +146,7 @@ function getterAddData({data, ref, pagination_info}) {
 Object.assign(SamanageAPI.Connection, {
   HTTP_ERROR: 'HTTP Error',
   NON_HTTP_ERROR: 'Non HTTP Error',
-  INVALID_JSON: 'Invalid JSON response data',
+  INVALID_JSON: 'Invalid JSON response data'
 })
 
 SamanageAPI.Connection.prototype = {
