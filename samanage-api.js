@@ -178,7 +178,7 @@ SamanageAPI.Connection.prototype = {
         return connection.callSamanageAPI(request, 'ref').catch(function(err) {
           //console.log(err)
           if ((err.error == SamanageAPI.Connection.HTTP_ERROR) && retry(err)) return
-          err.retries = attempt
+          err.retries = number
           throw err
         })
       }, 

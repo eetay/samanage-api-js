@@ -93,7 +93,7 @@ test('Retry failed request', ()=>{
       factor: 2,
       minTimeout: 1 * 100,
       maxTimeout: 60 * 100,
-     randomize: true,
+     randomize: true
     }
   )).rejects.toEqual(
     expect.objectContaining({
