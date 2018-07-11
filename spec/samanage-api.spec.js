@@ -82,6 +82,27 @@ test('Incident which does not exist return 404', ()=>{
   )).rejects.toHaveProperty('httpStatus', 404)
 })
 
+test('Retry failed request', ()=>{
+  return expect(connection.retrySamanageAPI(
+    SamanageAPI.update('incident')(3, {
+      name:'opened with samanage-api-js library'
+    }), 
+    'ref',
+    {
+      retries: 2,
+      factor: 2,
+      minTimeout: 1 * 100,
+      maxTimeout: 60 * 100,
+     randomize: true
+    }
+  )).rejects.toEqual(
+    expect.objectContaining({
+     error: SamanageAPI.Connection.HTTP_ERROR,
+     httpStatus: 404
+    })
+  )
+})
+
 test('Get incidents created between dates', ()=>{
   return expect(connection.callSamanageAPI(
     get_incidents(

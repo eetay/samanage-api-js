@@ -143,6 +143,12 @@ function getterAddData({data, ref, pagination_info}) {
   }
 }
 
+Object.assign(SamanageAPI.Connection, {
+  HTTP_ERROR: 'HTTP Error',
+  NON_HTTP_ERROR: 'Non HTTP Error',
+  INVALID_JSON: 'Invalid JSON response data'
+})
+
 SamanageAPI.Connection.prototype = {
   HTTP_ERROR: 'HTTP Error',
   NON_HTTP_ERROR: 'Non HTTP Error',
@@ -165,12 +171,14 @@ SamanageAPI.Connection.prototype = {
     return promise
   },
   retrySamanageAPI: function(request, ref, retry_opts) {
+    var connection = this
     return promiseRetry(
       function (retry, number) {
         //console.log('attempt number', number);
         return connection.callSamanageAPI(request, 'ref').catch(function(err) {
           //console.log(err)
-          if (retry(err)) return
+          if ((err.error == SamanageAPI.Connection.HTTP_ERROR) && retry(err)) return
+          err.retries = number
           throw err
         })
       }, 

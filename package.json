@@ -1,6 +1,6 @@
 {
   "name": "samanage-api",
-  "version": "2.3.4",
+  "version": "2.3.5",
   "description": "Library for performing API calls to Samanage Helpdesk Service",
   "main": "samanage-api.js",
   "repository": "git@github.com:eetay/samanage-api-js.git",
@@ -18,6 +18,7 @@
     "helpdesk"
   ],
   "dependencies": {
+    "promise-retry": "1.1.1",
     "request": "2.87.0"
   },
   "homepage": "https://github.com/eetay/samanage-api-js/blob/master/README.md",
