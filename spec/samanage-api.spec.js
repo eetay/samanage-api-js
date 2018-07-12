@@ -92,20 +92,18 @@ test('Incident which does not exist return 404 without retries', ()=>{
 test('Failed request with retryable codes', async ()=>{
   try { await prev_test } catch(e) {} // wait for previous test
   connection.retry_codes=[404]
+  var request = SamanageAPI.update('incident')(3, {
+    name:'opened with samanage-api-js library'
+  })
+  request.retry_opts = {
+    retries: 2,
+    factor: 2,
+    minTimeout: 1 * 100,
+    maxTimeout: 60 * 100,
+    randomize: true
+  }
   const codes = connection.retry_codes
-  result = expect(connection.callSamanageAPI(
-    SamanageAPI.update('incident')(3, {
-      name:'opened with samanage-api-js library'
-    }), 
-    'ref',
-    {
-      retries: 2,
-      factor: 2,
-      minTimeout: 1 * 100,
-      maxTimeout: 60 * 100,
-     randomize: true
-    }
-  )).rejects.toEqual(
+  result = expect(connection.callSamanageAPI(request, 'ref')).rejects.toEqual(
     expect.objectContaining({
       error: SamanageAPI.Connection.HTTP_ERROR,
       httpStatus: 404,

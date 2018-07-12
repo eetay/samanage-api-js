@@ -40,15 +40,26 @@ connection.callSamanageAPI(request, my_ref).then(success).catch(failure)
 ```
 
 ### Retries
+Retries are supported out of the box for certain HTTP codes which are retryable
+
+you can configure the retry logic
+
 ```javascript
-var retry_opts = { // see 'retry' npm module for full documentation
+var OPTS = { // see 'retry' npm module for full documentation
   retries: 3,
   factor: 2,
   minTimeout: 1 * 100,
   maxTimeout: 60 * 100,
   randomize: true,
 }
-connection.retrySamanageAPI(request, ref, retry_opts).then(success).catch(failure)
+
+// For all requests on a specific connection
+connection.retry_opts = OPTS
+connection.callSamanageAPI(request, ref).then(...).catch(...)
+
+// For a particular request
+request.retry_opts = OPTS 
+connection.callSamanageAPI(request, ref).then(...).catch(...)
 ```
 
 ## Retrieval with filters
