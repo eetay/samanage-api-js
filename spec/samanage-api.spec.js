@@ -3,7 +3,7 @@ function log() {
   //console.log('DEBUG', ...arguments)
 }
 process.on('unhandledRejection', function(error, promise) {
-    console.error('UNHANDLED REJECTION - Promise: ', promise, ', Error: ', error, ').');
+  console.error('UNHANDLED REJECTION - Promise: ', promise, ', Error: ', error, ').');
 });
 var SamanageAPI = require('../samanage-api.js')
 if (typeof process.env.TOKEN == 'undefined') throw 'Error: for tests api token must be set using "export TOKEN=" shell command to account #5 in production'
@@ -74,33 +74,43 @@ test('create Incident', ()=>{
   )).resolves.toHaveProperty('data.name', name)
 })
 
-test('Incident which does not exist return 404', ()=>{
-  return expect(connection.callSamanageAPI(
+var prev_test
+test('Incident which does not exist return 404 without retries', ()=>{
+  return expect(prev_test = connection.callSamanageAPI(
     SamanageAPI.update('incident')(3, {
       name:'opened with samanage-api-js library'
     })
-  )).rejects.toHaveProperty('httpStatus', 404)
-})
-
-test('Retry failed request', ()=>{
-  return expect(connection.retrySamanageAPI(
-    SamanageAPI.update('incident')(3, {
-      name:'opened with samanage-api-js library'
-    }), 
-    'ref',
-    {
-      retries: 2,
-      factor: 2,
-      minTimeout: 1 * 100,
-      maxTimeout: 60 * 100,
-     randomize: true
-    }
   )).rejects.toEqual(
     expect.objectContaining({
-     error: SamanageAPI.Connection.HTTP_ERROR,
-     httpStatus: 404
+      error: SamanageAPI.Connection.HTTP_ERROR,
+      httpStatus: 404,
+      attempts: 1
     })
   )
+})
+
+test('Failed request with retryable codes', async ()=>{
+  try { await prev_test } catch(e) {} // wait for previous test
+  connection.retry_codes=[404]
+  var request = SamanageAPI.update('incident')(3, {
+    name:'opened with samanage-api-js library'
+  })
+  request.retry_opts = {
+    retries: 2,
+    factor: 2,
+    minTimeout: 1 * 100,
+    maxTimeout: 60 * 100,
+    randomize: true
+  }
+  const codes = connection.retry_codes
+  result = expect(connection.callSamanageAPI(request, 'ref')).rejects.toEqual(
+    expect.objectContaining({
+      error: SamanageAPI.Connection.HTTP_ERROR,
+      httpStatus: 404,
+      attempts: 3
+    })
+  )
+  return result
 })
 
 test('Get incidents created between dates', ()=>{
@@ -125,12 +135,12 @@ test('Get incidents created between dates with pagination', ()=>{
         per_page(25).
         page(1)
     ),
-    'REF'
+    'REF5'
   ).then(function(data) {
     log(data)
     expect(data).toEqual(
       expect.objectContaining({
-        'ref': 'REF',
+        'ref': 'REF5',
         'data': expect.arrayContaining([
           expect.objectContaining({'id':expect.anything()})
          ])
@@ -143,6 +153,6 @@ test('Generated help', function() {
   [SamanageAPI, SamanageAPI.Filters, SamanageAPI.Connection].forEach(function(obj) {
     expect(typeof obj.help).toBe('object')
   })
-  expect(SamanageAPI.Connection.help).toEqual(expect.arrayContaining([expect.stringContaining('callSamanageAPI(request, ref)')]))
+  expect(SamanageAPI.Connection.help).toEqual(expect.arrayContaining([expect.stringContaining('callSamanageAPI(request, ref, retry_opts)')]))
 })
 

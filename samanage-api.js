@@ -101,6 +101,14 @@ var SamanageAPI = {
       'Content-Type': 'application/json',
       'Accept': 'application/vnd.samanage.v2.1+json'
     }
+    this.retry_codes = [429, 503]
+    this.retry_opts = {
+      retries: 2,
+      factor: 2,
+      minTimeout: 1 * 1000,
+      maxTimeout: 60 * 100,
+      randomize: false
+    }
   },
   debug: false,
   log: function() {
@@ -170,22 +178,23 @@ SamanageAPI.Connection.prototype = {
     })
     return promise
   },
-  retrySamanageAPI: function(request, ref, retry_opts) {
+  callSamanageAPI: function(request, ref, retry_opts) {
     var connection = this
+    var retry_setup = (retry_opts || request.retry_opts || connection.retry_opts)
     return promiseRetry(
       function (retry, number) {
         //console.log('attempt number', number);
-        return connection.callSamanageAPI(request, 'ref').catch(function(err) {
-          //console.log(err)
-          if ((err.error == SamanageAPI.Connection.HTTP_ERROR) && retry(err)) return
-          err.retries = number
+        return connection.singleSamanageAPI(request, ref).catch(function(err) {
+          //console.log(err, connection.retry_codes)
+          err.attempts = number
+          if ((err.error == SamanageAPI.Connection.HTTP_ERROR) && connection.retry_codes.includes(err.httpStatus) && retry(err)) return
           throw err
         })
       }, 
-      (retry_opts || request.retry_opts || connection.retry_opts)
+      retry_setup
     )
   },
-  callSamanageAPI: function(request, ref) {
+  singleSamanageAPI: function(request, ref) {
     var connection = this
     var log = request.log || SamanageAPI.log
     return new Promise(function(resolve, reject) {
