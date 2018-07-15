@@ -1,0 +1,48 @@
+slave:
+  adapter: mysql2
+  encoding: utf8mb4
+  reconnect: false
+  database: <%= "samanage_#{Rails.env}" %>
+  pool: 5
+  username: root
+  password:
+  socket: /tmp/mysql.sock
+  strict: false
+
+development:
+  adapter: mysql2
+  encoding: utf8mb4
+  reconnect: false
+  database: samanage_development
+  pool: 5
+  username: root
+  password:
+  socket: /tmp/mysql.sock
+  strict: false
+  shards:
+    1:
+      database: samanage_development
+    2:
+      database: group1_shard1_samanage_development
+
+test:
+  adapter: mysql2
+  encoding: utf8mb4
+  reconnect: false
+  database: samanage_test
+  pool: 5
+  username: root
+  password:
+  socket: /tmp/mysql.sock
+  strict: false
+
+production:
+  adapter: mysql2
+  encoding: utf8mb4
+  reconnect: false
+  database: samanage_development
+  pool: 5
+  username: root
+  password:
+  socket: /tmp/mysql.sock
+  strict: false
