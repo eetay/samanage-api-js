@@ -126,7 +126,7 @@ function getterAddData({data, ref, pagination_info}) {
   var log = state.log
   var filters = state.filters
   var current_filters = filters ? filters.clone() : new SamanageAPI.Filters()
-  var transaction_ref = 'ADD_DATA_URL:' + connection.origin + '/' + state.action(current_filters).path
+  var transaction_ref = 'GETTER REQ:' + connection.origin + '/' + state.action(current_filters).path
   if (data.length > 0) {
     log(transaction_ref + ': recieved ' + data.length + ' new items')
     data.forEach(function(item) {
@@ -177,7 +177,7 @@ SamanageAPI.Connection.prototype = {
       }
       var action = state.action(filters || new SamanageAPI.Filters())
       state.log = getter_log || SamanageAPI.log
-      connection.callSamanageAPI(action, state).then(getterAddData)
+      connection.callSamanageAPI(action, state).then(getterAddData).catch(rej)
     })
     return promise
   },
