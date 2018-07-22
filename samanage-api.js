@@ -101,7 +101,10 @@ var SamanageAPI = {
       'Content-Type': 'application/json',
       'Accept': 'application/vnd.samanage.v2.1+json'
     }
-    this.retry_codes = [429, 503]
+    this.valid_request_opts = ['timeout']
+    this.request_opts = {
+    }
+    this.retry_codes = [408, 409, 429, 503, 504]
     this.retry_opts = {
       retries: 2,
       factor: 2,
@@ -203,6 +206,11 @@ SamanageAPI.Connection.prototype = {
         url: urlx.resolve(connection.origin, request.path),
         headers: connection.headers
       }
+      connection.valid_request_opts.forEach((opt) => { 
+        if (connection.request_opts[opt] !== undefined) {
+          options[opt] = connection.request_opts[opt]
+        }
+      })
       ref = ref || options.url
       if (request.body) options['body'] = request.body
       log('callSamanageAPI:', { ref: ref, options: options, request: request })
