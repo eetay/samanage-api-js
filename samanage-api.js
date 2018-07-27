@@ -40,6 +40,22 @@ var SamanageAPI = {
       if (!type.match(cond)) throw func + ': parameter ' + index + ' must match ' + cond
     })
   },
+  export: function(object_type, scope) {
+    var action = function(filters) {
+      SamanageAPI.validateParams('get(filters)', arguments, [/object/])
+      return {
+        object_type: object_type,
+        scope: scope,
+        path: path.join(scope || '', object_type + 's.csv?export=true&format=csv&') + filters.to_query(),
+        method: request.get,
+        responseHandler: ()=>[]
+      }
+    }
+    action.log = SamanageAPI.log
+    action.object_type = object_type
+    action.scope = scope
+    return action
+  },
   get: function(object_type, scope) {
     var action = function(filters) {
       SamanageAPI.validateParams('get(filters)', arguments, [/object/])
@@ -99,7 +115,8 @@ var SamanageAPI = {
     this.headers = {
       'X-Samanage-Authorization': 'Bearer ' + token,
       'Content-Type': 'application/json',
-      'Accept': 'application/vnd.samanage.v2.1+json'
+      //'Accept': 'application/vnd.samanage.v2.1+json'
+      'Accept': '*/*'
     }
     this.valid_request_opts = ['timeout']
     this.request_opts = {
@@ -233,7 +250,7 @@ SamanageAPI.Connection.prototype = {
         } else try {
           log('callSamanageAPI ok:', {ref: ref, body: body.substring(0,100), headers: response.headers})
           resolve({
-            data: JSON.parse(body),
+            data: (request.responseHandler || JSON.parse)(body),
             ref: ref,
             pagination_info: SamanageAPI.getPaginationInfo(response.headers)
           })

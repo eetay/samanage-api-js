@@ -12,6 +12,7 @@ var connection = new SamanageAPI.Connection(process.env.TOKEN, 'https://api.sama
 
 //SamanageAPI.debug = true
 var get_incidents = SamanageAPI.get('incident')
+var export_incidents = SamanageAPI.export('incident')
 
 /*
 var Incidents = connection.getter('incident', (new SamanageAPI.Filters()).page(50).per_page(100), undefined, console.log)
@@ -111,6 +112,25 @@ test('Failed request with retryable codes', async ()=>{
     })
   )
   return result
+})
+
+test('Export incidents created between dates', ()=>{
+  return connection.callSamanageAPI(
+    export_incidents(
+      new SamanageAPI.Filters().between_dates('created','2017-01-01','2018-07-07')
+    )
+  ).then(function(data) {
+    expect(data).toEqual(
+      expect.objectContaining({
+        'pagination_info': expect.objectContaining({
+          per_page: '25',
+          current_page: '1'
+        }),
+        'ref': expect.stringContaining('export=true'),
+        'data': []
+      })
+    )
+  })
 })
 
 test('Get incidents created between dates', ()=>{
