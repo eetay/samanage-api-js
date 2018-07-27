@@ -87,6 +87,24 @@ var filters = new SamanageAPI.Filters().
 var request = get_incidents(filters)
 ```
 
+## Export with filters
+
+```javascript
+var export_incidents = SamanageAPI.export('incident')
+connection.callSamanageAPI(
+  export_incidents(
+    new SamanageAPI.Filters().between_dates('created','2017-01-01','2018-07-07')
+  )
+).then(function (result) {
+  /* Success:
+    result contains pagination info (how many incidents are there) but
+    does NOT contain the incidents' data. It is sent via email
+  */
+}).catch(function(error) {
+  // Failure
+})
+```
+
 ## Update
 ```javascript
 var request = SamanageAPI.update('incident')(3, {
