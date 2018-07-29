@@ -10,7 +10,6 @@ if (typeof process.env.TOKEN == 'undefined') throw 'Error: for tests api token m
 
 var connection = new SamanageAPI.Connection(process.env.TOKEN, 'https://api.samanage.com')
 
-//SamanageAPI.debug = true
 var get_incidents = SamanageAPI.get('incident')
 var export_incidents = SamanageAPI.export('incident')
 
@@ -20,7 +19,23 @@ Incidents.then(function (incidents) {
   console.log('DONE!!!!:', Object.keys(incidents).length)
 })
 */
-
+test('Export incidents created between dates', ()=>{
+  return connection.callSamanageAPI(
+    export_incidents(
+      new SamanageAPI.Filters().between_dates('created','2017-01-01','2018-07-07').add({http_integration: 82}).per_page(25)
+    )
+  ).then(function(data) {
+    expect(data).toEqual(
+      expect.objectContaining({
+        'pagination_info': expect.objectContaining({
+          per_page: '25'
+        }),
+        'ref': expect.stringContaining('export=true'),
+        'data': []
+      })
+    )
+  })
+})
 test('Incident getter by title with comments getter', () => {
   expect.assertions(1)
   var Incidents = connection.getter('incident', (new SamanageAPI.Filters()).title('*new*'))
