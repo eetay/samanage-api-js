@@ -22,7 +22,7 @@ Incidents.then(function (incidents) {
 test('Export incidents created between dates', ()=>{
   return connection.callSamanageAPI(
     export_incidents(
-      new SamanageAPI.Filters().between_dates('created','2017-01-01','2018-07-07').add({http_integration: 82}).per_page(25)
+      new SamanageAPI.Filters().between_dates('created','2017-01-01','2018-07-07').add({http_integration: 13174}).per_page(25)
     )
   ).then(function(data) {
     expect(data).toEqual(
