@@ -3,6 +3,10 @@
   "version": "2.7.1",
   "description": "Library for performing API calls to Samanage Helpdesk Service",
   "main": "samanage-api.js",
+  "engines": {
+    "node": ">=7.10.1"
+  },
+  "browser": "dist/samanage-api.bundle.js",
   "repository": "git@github.com:eetay/samanage-api-js.git",
   "author": "Eetay Natan <eetay.natan@samanage.com>",
   "license": "MIT",
@@ -11,6 +15,8 @@
     "samanage",
     "javascript",
     "api",
+    "browser",
+    "node",
     "service desk",
     "incidents",
     "samanage.js",
@@ -23,16 +29,34 @@
   },
   "homepage": "https://github.com/eetay/samanage-api-js/blob/master/README.md",
   "devDependencies": {
-    "eslint": "4.15.0",
-    "eslint-plugin-jest": "21.17.0",
-    "eslint-plugin-react": "7.10.0",
-    "global": "4.3.2",
-    "jest": "23.2.0"
+    "babel-cli": "6.26.0",
+    "babel-core": "6.26.3",
+    "babel-eslint": "8.2.5",
+    "babel-loader": "7.1.4",
+    "babel-plugin-transform-class-properties": "6.24.1",
+    "babel-plugin-transform-object-rest-spread": "6.26.0",
+    "babel-preset-es2015": "6.24.1",
+    "babel-preset-stage-0": "6.24.1",
+    "babel-register": "6.26.0",
+    "eslint": "5.0.1",
+    "eslint-plugin-import": "2.13.0",
+    "eslint-plugin-jest": "21.18.0",
+    "eslint-plugin-jsx-a11y": "6.1.0",
+    "eslint-plugin-security": "1.4.0",
+    "jest": "23.2.0",
+    "webpack": "4.8.3",
+    "webpack-cli": "2.1.3",
+    "webpack-dev-server": "3.1.4"
   },
   "bugs": {
     "url": "https://github.com:eetay/samanage-api-js/issues"
   },
   "scripts": {
-    "test": "jest --detectOpenHandles"
+    "test": "jest --detectOpenHandles",
+    "lint": "node_modules/.bin/eslint .",
+    "build": "webpack --display-error-details --colors --progress --config webpack/webpack.prod.config.js"
+  },
+  "jest": {
+    "testURL": "http://localhost:8080"
   }
 }

@@ -3,6 +3,7 @@ function log() {
   //console.log('DEBUG', ...arguments)
 }
 process.on('unhandledRejection', function(error, promise) {
+  // eslint-disable-next-line no-console
   console.error('UNHANDLED REJECTION - Promise: ', promise, ', Error: ', error, ').');
 });
 var SamanageAPI = require('../samanage-api.js')
@@ -91,7 +92,7 @@ test('create Incident', ()=>{
   )).resolves.toHaveProperty('data.name', name)
 })
 
-var prev_test
+var prev_test = null
 test('Incident which does not exist return 404 without retries', ()=>{
   return expect(prev_test = connection.callSamanageAPI(
     SamanageAPI.update('incident')(3, {
@@ -107,8 +108,9 @@ test('Incident which does not exist return 404 without retries', ()=>{
 })
 
 test('Failed request with retryable codes', async ()=>{
-  try { await prev_test } catch(e) {} // wait for previous test
-  connection.retry_codes=[404]
+  // eslint-disable-next-line max-statements-per-line,no-empty
+  try { await prev_test } catch (e) {} // wait for previous test; might throw error
+  connection.retry_codes = [404]
   var request = SamanageAPI.update('incident')(3, {
     name:'opened with samanage-api-js library'
   })
@@ -119,8 +121,7 @@ test('Failed request with retryable codes', async ()=>{
     maxTimeout: 60 * 100,
     randomize: true
   }
-  const codes = connection.retry_codes
-  result = expect(connection.callSamanageAPI(request, 'ref')).rejects.toEqual(
+  const result = expect(connection.callSamanageAPI(request, 'ref')).rejects.toEqual(
     expect.objectContaining({
       error: SamanageAPI.Connection.HTTP_ERROR,
       httpStatus: 404,

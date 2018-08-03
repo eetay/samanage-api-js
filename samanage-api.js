@@ -132,6 +132,7 @@ var SamanageAPI = {
   },
   debug: false,
   log: function() {
+    // eslint-disable-next-line no-console
     if (SamanageAPI.debug) console.log('DEBUG', ...arguments)
   }
 }
@@ -216,7 +217,6 @@ SamanageAPI.Connection.prototype = {
     )
   },
   processResponse: function(request, response, resolve, reject, ref) {
-    var connection = this
     var log = request.log || SamanageAPI.log
     response.text().then(function(body) {
       try {
@@ -255,7 +255,7 @@ SamanageAPI.Connection.prototype = {
         method: request.method
       }
       connection.valid_request_opts.forEach((opt) => {
-        if (connection.request_opts[opt] !== undefined) {
+        if (typeof connection.request_opts[opt] !== "undefined") {
           options[opt] = connection.request_opts[opt]
         }
       })

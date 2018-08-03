@@ -6,12 +6,12 @@
     },
     "extends": "eslint:recommended",
     "parserOptions": {
+        "ecmaVersion": 8,
         "ecmaFeatures": {
-            "experimentalObjectRestSpread": true,
             "jsx": true
         }
     },
-    "plugins": [ "react" ],
+    "plugins": [ ],
     "overrides": [{
       "files": [ "spec/*.js" ],
       "env": { "jest": true },
@@ -39,7 +39,7 @@
         "camelcase": "off",
         "capitalized-comments": "off",
         "class-methods-use-this": "error",
-        "comma-dangle": "error",
+        "comma-dangle": [ "error", "never" ],
         "comma-spacing": "off",
         "comma-style": [
             "error",
@@ -98,7 +98,7 @@
         "lines-between-class-members": "error",
         "max-depth": "error",
         "max-len": "off",
-        "max-lines": "error",
+        "max-lines": "off",
         "max-nested-callbacks": "error",
         "max-params": "off",
         "max-statements": "off",
