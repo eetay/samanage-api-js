@@ -1,4 +1,4 @@
-var request = require('request')
+var fetch = require('cross-fetch')
 var urlx = require('url')
 var path = require('path')
 var promiseRetry = require('promise-retry')
@@ -25,10 +25,10 @@ function describeObject(obj) {
 var SamanageAPI = {
   getPaginationInfo: function (response_headers) {
     return {
-      per_page: response_headers['x-per-page'],
-      current_page: response_headers['x-current-page'],
-      total_count: response_headers['x-total-count'],
-      total_pages: response_headers['x-total-pages']
+      per_page: response_headers.get('x-per-page'),
+      current_page: response_headers.get('x-current-page'),
+      total_count: response_headers.get('x-total-count'),
+      total_pages: response_headers.get('x-total-pages')
     }
   },
   Filters: function() { this.attrs={} },
@@ -47,7 +47,7 @@ var SamanageAPI = {
         object_type: object_type,
         scope: scope,
         path: path.join(scope || '', object_type + 's.csv?export=true&format=csv&') + filters.to_query(),
-        method: request.get,
+        method: 'GET',
         responseHandler: ()=>[]
       }
     }
@@ -63,7 +63,7 @@ var SamanageAPI = {
         object_type: object_type,
         scope: scope,
         path: path.join(scope || '', object_type + 's.json?') + filters.to_query(),
-        method: request.get
+        method: 'GET'
       }
     }
     action.log = SamanageAPI.log
@@ -81,7 +81,7 @@ var SamanageAPI = {
         scope: scope,
         path: path.join(scope || '', object_type +'s.json'),
         body: JSON.stringify(wrapper),
-        method: request.post
+        method: 'POST'
       }
     }
     action.log = SamanageAPI.log
@@ -99,7 +99,7 @@ var SamanageAPI = {
         scope: scope,
         path: path.join(scope || '', object_type + 's/' + object_id + '.json'),
         body: JSON.stringify(wrapper),
-        method: request.put
+        method: 'PUT'
       }
     }
     action.log = SamanageAPI.log
@@ -174,6 +174,7 @@ function getterAddData({data, ref, pagination_info}) {
 Object.assign(SamanageAPI.Connection, {
   HTTP_ERROR: 'HTTP Error',
   NON_HTTP_ERROR: 'Non HTTP Error',
+  GET_BODY_ERROR: 'Error getting response body',
   INVALID_JSON: 'Invalid JSON response data'
 })
 
@@ -210,9 +211,38 @@ SamanageAPI.Connection.prototype = {
           if ((err.error == SamanageAPI.Connection.HTTP_ERROR) && connection.retry_codes.includes(err.httpStatus) && retry(err)) return
           throw err
         })
-      }, 
+      },
       retry_setup
     )
+  },
+  processResponse: function(request, response, resolve, reject, ref) {
+    var connection = this
+    var log = request.log || SamanageAPI.log
+    response.text().then(function(body) {
+      try {
+        log('callSamanageAPI ok:', {ref: ref, body: body.substring(0,100), headers: response.headers})
+        resolve({
+          data: (request.responseHandler || JSON.parse)(body),
+          ref: ref,
+          pagination_info: SamanageAPI.getPaginationInfo(response.headers)
+        })
+      } catch(e) {
+        log('callSamanageAPI exception:', ref, e)
+        reject({
+          error: SamanageAPI.Connection.INVALID_JSON,
+          info: body,
+          ref: ref,
+          exception: e
+        })
+      }
+    }).catch(function(error) {
+      log('callSamanageAPI error:', ref, error)
+      reject({
+        error: SamanageAPI.Connection.GET_BODY_ERROR,
+        info: error,
+        ref: ref
+      })
+    }) // response.text().then(...).catch(...)
   },
   singleSamanageAPI: function(request, ref) {
     var connection = this
@@ -221,9 +251,10 @@ SamanageAPI.Connection.prototype = {
       var options = {
         followAllRedirects: true,
         url: urlx.resolve(connection.origin, request.path),
-        headers: connection.headers
+        headers: connection.headers,
+        method: request.method
       }
-      connection.valid_request_opts.forEach((opt) => { 
+      connection.valid_request_opts.forEach((opt) => {
         if (connection.request_opts[opt] !== undefined) {
           options[opt] = connection.request_opts[opt]
         }
@@ -231,40 +262,27 @@ SamanageAPI.Connection.prototype = {
       ref = ref || options.url
       if (request.body) options['body'] = request.body
       log('callSamanageAPI:', { ref: ref, options: options, request: request })
-      request.method(options, function(error, response, body) {
-        if (response && response.statusCode != 200) {
-          log('callSamanageAPI HTTP error:', ref, response.statusCode)
+      fetch(options.url, options).then(function(response) {
+        if (response.status != 200) {
+          log('callSamanageAPI HTTP error:', ref, response.status)
           reject({
-            error: connection.HTTP_ERROR,
-            httpStatus: (response && response.statusCode),
-            info: body,
+            error: SamanageAPI.Connection.HTTP_ERROR,
+            httpStatus: response.status,
+            info: response.statusText,
             ref: ref
           })
-        } else if (error) {
-          log('callSamanageAPI error:', ref, error)
-          reject({
-            error: connection.NON_HTTP_ERROR,
-            info: error,
-            ref: ref
-          })
-        } else try {
-          log('callSamanageAPI ok:', {ref: ref, body: body.substring(0,100), headers: response.headers})
-          resolve({
-            data: (request.responseHandler || JSON.parse)(body),
-            ref: ref,
-            pagination_info: SamanageAPI.getPaginationInfo(response.headers)
-          })
-        } catch(e) {
-          log('callSamanageAPI exception:', ref, e)
-          reject({
-            error: connection.INVALID_JSON,
-            info: body,
-            ref: ref,
-            exception: e
-          })
-        }
-      })
-    })
+        } else {
+          connection.processResponse(request, response, resolve, reject, ref)
+        } // else
+      }).catch(function (error) {
+        log('callSamanageAPI error:', ref, error)
+        reject({
+          error: SamanageAPI.Connection.NON_HTTP_ERROR,
+          info: error,
+          ref: ref
+        })
+      }) // fetch.then(...).catch(...)
+    }) // new Promise(...)
   }
 }
 
