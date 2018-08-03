@@ -118,7 +118,7 @@ var SamanageAPI = {
       //'Accept': 'application/vnd.samanage.v2.1+json'
       'Accept': '*/*'
     }
-    this.valid_request_opts = ['timeout']
+    this.valid_request_opts = ['timeout', 'mode', 'cache', 'credentials', 'referrer', 'follow', 'agent']
     this.request_opts = {
     }
     this.retry_codes = [408, 409, 429, 503, 504]
@@ -249,7 +249,7 @@ SamanageAPI.Connection.prototype = {
     var log = request.log || SamanageAPI.log
     return new Promise(function(resolve, reject) {
       var options = {
-        followAllRedirects: true,
+        redirect: 'follow',
         url: urlx.resolve(connection.origin, request.path),
         headers: connection.headers,
         method: request.method
@@ -263,7 +263,7 @@ SamanageAPI.Connection.prototype = {
       if (request.body) options['body'] = request.body
       log('callSamanageAPI:', { ref: ref, options: options, request: request })
       fetch(options.url, options).then(function(response) {
-        if ((response.status >= 200) && (response.status < 300)) {
+        if ((response.status < 200) || (response.status >= 300)) {
           log('callSamanageAPI HTTP error:', ref, response.status)
           reject({
             error: SamanageAPI.Connection.HTTP_ERROR,
