@@ -36,6 +36,7 @@ test('Export incidents created between dates', ()=>{
     )
   })
 })
+
 test('Incident getter by title with comments getter', () => {
   expect.assertions(1)
   var Incidents = connection.getter('incident', (new SamanageAPI.Filters()).title('*new*'))
