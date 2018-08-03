@@ -263,7 +263,7 @@ SamanageAPI.Connection.prototype = {
       if (request.body) options['body'] = request.body
       log('callSamanageAPI:', { ref: ref, options: options, request: request })
       fetch(options.url, options).then(function(response) {
-        if (response.status != 200) {
+        if ((response.status >= 200) && (response.status < 300)) {
           log('callSamanageAPI HTTP error:', ref, response.status)
           reject({
             error: SamanageAPI.Connection.HTTP_ERROR,
@@ -273,7 +273,7 @@ SamanageAPI.Connection.prototype = {
           })
         } else {
           connection.processResponse(request, response, resolve, reject, ref)
-        } // else
+        }
       }).catch(function (error) {
         log('callSamanageAPI error:', ref, error)
         reject({
