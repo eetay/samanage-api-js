@@ -1,4 +1,4 @@
-var fetch = require('cross-fetch')
+var cross_fetch = require('cross-fetch')
 var urlx = require('url')
 var path = require('path')
 var promiseRetry = require('promise-retry')
@@ -180,9 +180,6 @@ Object.assign(SamanageAPI.Connection, {
 })
 
 SamanageAPI.Connection.prototype = {
-  HTTP_ERROR: 'HTTP Error',
-  NON_HTTP_ERROR: 'Non HTTP Error',
-  INVALID_JSON: 'Invalid JSON response data',
   getter: function(object_type, filters, scope, getter_log) {
     var connection = this
     var promise = new Promise(function(res, rej) {
@@ -250,10 +247,10 @@ SamanageAPI.Connection.prototype = {
     return new Promise(function(resolve, reject) {
       var options = {
         redirect: 'follow',
-        url: urlx.resolve(connection.origin, request.path),
         headers: connection.headers,
         method: request.method
       }
+      var url=urlx.resolve(connection.origin, request.path)
       connection.valid_request_opts.forEach((opt) => {
         if (typeof connection.request_opts[opt] !== "undefined") {
           options[opt] = connection.request_opts[opt]
@@ -262,7 +259,10 @@ SamanageAPI.Connection.prototype = {
       ref = ref || options.url
       if (request.body) options['body'] = request.body
       log('callSamanageAPI:', { ref: ref, options: options, request: request })
-      fetch(options.url, options).then(function(response) {
+      console.log(fetch, cross_fetch, options, url)
+      debugger
+      (fetch || cross_fetch)(url, options).then(function(response) {
+        debugger
         if ((response.status < 200) || (response.status >= 300)) {
           log('callSamanageAPI HTTP error:', ref, response.status)
           reject({

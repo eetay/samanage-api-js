@@ -22,5 +22,8 @@ module.exports = {
         plugins: ['transform-class-properties']
       }
     }]
+  },
+  externals: {
+    'fetch': 'commonjs fetch'
   }
 }

@@ -2,7 +2,7 @@
   "name": "samanage-api",
   "version": "2.7.1",
   "description": "Library for performing API calls to Samanage Helpdesk Service",
-  "main": "samanage-api.js",
+  "main": "index.js",
   "engines": {
     "node": ">=7.10.1"
   },
@@ -53,7 +53,8 @@
   },
   "scripts": {
     "test": "jest --detectOpenHandles",
-    "lint": "node_modules/.bin/eslint .",
+    "dev": "./node_modules/.bin/webpack-dev-server  --inline --config webpack/webpack.dev.config.js",
+    "lint": "./node_modules/.bin/eslint .",
     "build": "webpack --display-error-details --colors --progress --config webpack/webpack.prod.config.js"
   },
   "jest": {

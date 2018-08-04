@@ -1,3 +1,5 @@
+var SamanageAPI = require('../index.js')
+if (!jest) require('jest')
 jest.setTimeout(120000)
 function log() {
   //console.log('DEBUG', ...arguments)
@@ -6,7 +8,6 @@ process.on('unhandledRejection', function(error, promise) {
   // eslint-disable-next-line no-console
   console.error('UNHANDLED REJECTION - Promise: ', promise, ', Error: ', error, ').');
 });
-var SamanageAPI = require('../samanage-api.js')
 if (typeof process.env.TOKEN == 'undefined') throw 'Error: for tests api token must be set using "export TOKEN=" shell command to account #5 in production'
 
 var connection = new SamanageAPI.Connection(process.env.TOKEN, 'https://api.samanage.com')
