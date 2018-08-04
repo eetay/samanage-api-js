@@ -1,5 +1,5 @@
 var SamanageAPI = require('../index.js')
-if (!jest) require('jest')
+require('jest')
 jest.setTimeout(120000)
 function log() {
   //console.log('DEBUG', ...arguments)

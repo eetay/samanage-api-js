@@ -256,13 +256,10 @@ SamanageAPI.Connection.prototype = {
           options[opt] = connection.request_opts[opt]
         }
       })
-      ref = ref || options.url
+      ref = ref || url
       if (request.body) options['body'] = request.body
       log('callSamanageAPI:', { ref: ref, options: options, request: request })
-      console.log(fetch, cross_fetch, options, url)
-      debugger
-      (fetch || cross_fetch)(url, options).then(function(response) {
-        debugger
+      cross_fetch(url, options).then(function(response) {
         if ((response.status < 200) || (response.status >= 300)) {
           log('callSamanageAPI HTTP error:', ref, response.status)
           reject({
