@@ -5,9 +5,11 @@ It is a work in progress and may not support all the options offered by the Sama
 Feel free to contact me with requests, issues or questions.
 
 samanage-api code is reviewed with [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b37abcd47e7a4753811ab872e644211a)](https://www.codacy.com/app/eetay/samanage-api-js?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=eetay/samanage-api-js&amp;utm_campaign=Badge_Grade)
-and unit tested with <img src="./spec/jest.png" alt="Jest" width="32px"/>
+and unit tested with Jest <img src="./spec/jest.png" alt="Jest" width="32px"/>
 
-[Try it](https://npm.runkit.com/samanage-api)
+If you'd like to contribute, you are welcome to fork, and submit pull requests to the original library, or contact me at eetay.natan@samanage.com
+
+[Try it on runKit](https://npm.runkit.com/samanage-api) (You will need a Samanage API token.  [How to get a token](https://community.samanage.com/docs/DOC-1459-encrypted-tokens-authentication-for-api-integration-overview))
 
 ## Installation
 ```bash
